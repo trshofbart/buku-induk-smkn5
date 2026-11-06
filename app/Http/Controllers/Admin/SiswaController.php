@@ -228,10 +228,31 @@ class SiswaController extends Controller
     /** Halaman cetak detail siswa (print-to-PDF via window.print). */
     public function cetak(Siswa $siswa)
     {
-        $siswa->load(['jurusan', 'kelas', 'tahunAjaran', 'orangTua', 'ledger', 'transkrip']);
+        $siswa->load(['jurusan', 'kelas', 'tahunAjaran', 'orangTua', 'ledger.tahunAjaran', 'transkrip']);
+
+        // Ledger dikelompokkan per tingkat mengikuti HAL_PRINT file MASTER:
+        // X = semester 1-2, XI = 3-4, XII = 5-6, beserta tahun diklatnya.
+        $perSemester = $siswa->ledger->keyBy('semester');
+        $tingkatData = [];
+        foreach (['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]] as $tingkat => $smts) {
+            $tahun = null;
+            foreach ($smts as $s) {
+                if (($perSemester[$s] ?? null)?->tahunAjaran) {
+                    $tahun = $perSemester[$s]->tahunAjaran->nama;
+                    break;
+                }
+            }
+            $tingkatData[$tingkat] = [
+                'tahun' => $tahun,
+                'smt1' => $perSemester[$smts[0]] ?? null,
+                'smt2' => $perSemester[$smts[1]] ?? null,
+            ];
+        }
+
         return view('admin.siswa.cetak', [
             'siswa' => $siswa,
             'sekolah' => \App\Models\DataSekolah::get(),
+            'tingkatData' => $tingkatData,
         ]);
     }
 
@@ -259,6 +280,13 @@ class SiswaController extends Controller
             'tanggal_masuk' => 'nullable|date',
             'tanggal_keluar' => 'nullable|date',
             'keterangan' => 'nullable|string',
+            'sekolah_asal' => 'nullable|string|max:150',
+            'alamat_sekolah_asal' => 'nullable|string',
+            'tahun_lulus' => 'nullable|string|max:9',
+            'no_ijazah' => 'nullable|string|max:50',
+            'diterima_tingkat' => 'nullable|string|max:30',
+            'mutasi_ke' => 'nullable|string|max:100',
+            'mutasi_dari' => 'nullable|string|max:100',
         ]);
     }
 
@@ -273,6 +301,8 @@ class SiswaController extends Controller
             'pekerjaan_wali' => 'nullable|string|max:100',
             'no_hp_ortu' => 'nullable|string|max:20',
             'alamat_ortu' => 'nullable|string',
+            'alamat_wali' => 'nullable|string',
+            'no_hp_wali' => 'nullable|string|max:20',
         ]);
         return $v;
     }

@@ -35,6 +35,25 @@
     </div>
 
     <div>
+        <h2 class="font-bold">Sekolah Asal &amp; Ijazah</h2>
+        <div class="grid md:grid-cols-2 gap-3 mt-3">
+            <div><label class="text-sm font-semibold">Sekolah Asal</label><input name="sekolah_asal" value="{{ old('sekolah_asal', $siswa->sekolah_asal) }}" class="w-full border rounded-lg px-3 py-2"></div>
+            <div><label class="text-sm font-semibold">Alamat Sekolah Asal</label><input name="alamat_sekolah_asal" value="{{ old('alamat_sekolah_asal', $siswa->alamat_sekolah_asal) }}" class="w-full border rounded-lg px-3 py-2"></div>
+            <div><label class="text-sm font-semibold">Tahun Lulus (SMP/MTs)</label><input name="tahun_lulus" value="{{ old('tahun_lulus', $siswa->tahun_lulus) }}" placeholder="cth: 2019" class="w-full border rounded-lg px-3 py-2"></div>
+            <div><label class="text-sm font-semibold">No Ijazah</label><input name="no_ijazah" value="{{ old('no_ijazah', $siswa->no_ijazah) }}" class="w-full border rounded-lg px-3 py-2"></div>
+            <div><label class="text-sm font-semibold">Diterima di Tingkat</label><input name="diterima_tingkat" value="{{ old('diterima_tingkat', $siswa->diterima_tingkat) }}" placeholder="cth: X (Sepuluh)" class="w-full border rounded-lg px-3 py-2"></div>
+        </div>
+    </div>
+
+    <div>
+        <h2 class="font-bold">Mutasi</h2>
+        <div class="grid md:grid-cols-2 gap-3 mt-3">
+            <div><label class="text-sm font-semibold">Pindah ke (tingkat / tahun)</label><input name="mutasi_ke" value="{{ old('mutasi_ke', $siswa->mutasi_ke) }}" placeholder="cth: XI / 2021" class="w-full border rounded-lg px-3 py-2"></div>
+            <div><label class="text-sm font-semibold">Pindahan dari (tingkat / tahun)</label><input name="mutasi_dari" value="{{ old('mutasi_dari', $siswa->mutasi_dari) }}" placeholder="cth: X / 2020" class="w-full border rounded-lg px-3 py-2"></div>
+        </div>
+    </div>
+
+    <div>
         <h2 class="font-bold">Orang Tua / Wali</h2>
         <div class="grid md:grid-cols-2 gap-3 mt-3">
             <div><label class="text-sm font-semibold">Nama Ayah</label><input name="nama_ayah" value="{{ old('nama_ayah', $siswa->orangTua?->nama_ayah) }}" class="w-full border rounded-lg px-3 py-2"></div>
@@ -42,7 +61,11 @@
             <div><label class="text-sm font-semibold">Nama Ibu</label><input name="nama_ibu" value="{{ old('nama_ibu', $siswa->orangTua?->nama_ibu) }}" class="w-full border rounded-lg px-3 py-2"></div>
             <div><label class="text-sm font-semibold">Pekerjaan Ibu</label><input name="pekerjaan_ibu" value="{{ old('pekerjaan_ibu', $siswa->orangTua?->pekerjaan_ibu) }}" class="w-full border rounded-lg px-3 py-2"></div>
             <div><label class="text-sm font-semibold">Nama Wali</label><input name="nama_wali" value="{{ old('nama_wali', $siswa->orangTua?->nama_wali) }}" class="w-full border rounded-lg px-3 py-2"></div>
+            <div><label class="text-sm font-semibold">Pekerjaan Wali</label><input name="pekerjaan_wali" value="{{ old('pekerjaan_wali', $siswa->orangTua?->pekerjaan_wali) }}" class="w-full border rounded-lg px-3 py-2"></div>
             <div><label class="text-sm font-semibold">No HP Orang Tua</label><input name="no_hp_ortu" value="{{ old('no_hp_ortu', $siswa->orangTua?->no_hp_ortu) }}" class="w-full border rounded-lg px-3 py-2"></div>
+            <div><label class="text-sm font-semibold">No HP Wali</label><input name="no_hp_wali" value="{{ old('no_hp_wali', $siswa->orangTua?->no_hp_wali) }}" class="w-full border rounded-lg px-3 py-2"></div>
+            <div class="md:col-span-2"><label class="text-sm font-semibold">Alamat Orang Tua</label><textarea name="alamat_ortu" rows="2" class="w-full border rounded-lg px-3 py-2">{{ old('alamat_ortu', $siswa->orangTua?->alamat_ortu) }}</textarea></div>
+            <div class="md:col-span-2"><label class="text-sm font-semibold">Alamat Wali</label><textarea name="alamat_wali" rows="2" class="w-full border rounded-lg px-3 py-2">{{ old('alamat_wali', $siswa->orangTua?->alamat_wali) }}</textarea></div>
         </div>
     </div>
 

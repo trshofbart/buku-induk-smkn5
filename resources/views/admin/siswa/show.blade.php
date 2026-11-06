@@ -24,6 +24,10 @@
             <dt class="text-slate-500">Jurusan / Kelas</dt><dd>{{ $siswa->jurusan?->nama }} / {{ $siswa->kelas?->nama ?? '-' }}</dd>
             <dt class="text-slate-500">Tahun Ajaran</dt><dd>{{ $siswa->tahunAjaran?->nama }}</dd>
             <dt class="text-slate-500">Status</dt><dd>{{ $siswa->statusLabel() }}</dd>
+            <dt class="text-slate-500">Sekolah Asal</dt><dd>{{ $siswa->sekolah_asal ?? '-' }} — {{ $siswa->alamat_sekolah_asal ?? '-' }}</dd>
+            <dt class="text-slate-500">Tahun Lulus / No Ijazah</dt><dd>{{ $siswa->tahun_lulus ?? '-' }} / {{ $siswa->no_ijazah ?? '-' }}</dd>
+            <dt class="text-slate-500">Diterima di Tingkat</dt><dd>{{ $siswa->diterima_tingkat ?? '-' }} — {{ $siswa->tanggal_masuk?->format('d M Y') ?? '-' }}</dd>
+            <dt class="text-slate-500">Mutasi</dt><dd>Pindah ke: {{ $siswa->mutasi_ke ?? '-' }}; dari: {{ $siswa->mutasi_dari ?? '-' }}</dd>
         </dl>
     </div>
     <div class="space-y-4">
@@ -32,8 +36,11 @@
             <dl class="mt-2 text-sm space-y-1">
                 <dt class="text-slate-500">Ayah</dt><dd>{{ $siswa->orangTua?->nama_ayah ?? '-' }} ({{ $siswa->orangTua?->pekerjaan_ayah ?? '-' }})</dd>
                 <dt class="text-slate-500">Ibu</dt><dd>{{ $siswa->orangTua?->nama_ibu ?? '-' }} ({{ $siswa->orangTua?->pekerjaan_ibu ?? '-' }})</dd>
-                <dt class="text-slate-500">Wali</dt><dd>{{ $siswa->orangTua?->nama_wali ?? '-' }}</dd>
+                <dt class="text-slate-500">Wali</dt><dd>{{ $siswa->orangTua?->nama_wali ?? '-' }} ({{ $siswa->orangTua?->pekerjaan_wali ?? '-' }})</dd>
+                <dt class="text-slate-500">Alamat Orang Tua</dt><dd>{{ $siswa->orangTua?->alamat_ortu ?? '-' }}</dd>
+                <dt class="text-slate-500">Alamat Wali</dt><dd>{{ $siswa->orangTua?->alamat_wali ?? '-' }}</dd>
                 <dt class="text-slate-500">No HP Orang Tua</dt><dd>{{ $siswa->orangTua?->no_hp_ortu ?? '-' }}</dd>
+                <dt class="text-slate-500">No HP Wali</dt><dd>{{ $siswa->orangTua?->no_hp_wali ?? '-' }}</dd>
             </dl>
         </div>
         <div class="bg-white rounded-xl shadow p-5">

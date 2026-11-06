@@ -30,6 +30,8 @@ class Siswa extends Model
         'nis', 'nisn', 'nama', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
         'agama', 'alamat', 'no_hp', 'tahun_ajaran_id', 'jurusan_id', 'kelas_id',
         'status', 'tanggal_masuk', 'tanggal_keluar', 'keterangan', 'foto',
+        'sekolah_asal', 'alamat_sekolah_asal', 'tahun_lulus', 'no_ijazah',
+        'diterima_tingkat', 'mutasi_ke', 'mutasi_dari',
     ];
 
     protected function casts(): array
