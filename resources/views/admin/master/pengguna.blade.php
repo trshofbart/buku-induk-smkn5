@@ -1,0 +1,26 @@
+@extends('layouts.admin')
+@section('title', 'Pengguna (Akun Pegawai)')
+
+@section('content')
+<p class="text-sm text-slate-500 -mt-2 mb-4">Hanya Admin TU yang bisa menambah akun. Tidak ada pendaftaran publik.</p>
+<form method="POST" action="{{ route('admin.pengguna.store') }}" class="bg-white rounded-xl shadow p-4 grid md:grid-cols-6 gap-2 mb-4">
+    @csrf
+    <input name="name" required placeholder="Nama pegawai" class="border rounded-lg px-3 py-2">
+    <input type="email" name="email" required placeholder="Email" class="border rounded-lg px-3 py-2">
+    <input type="password" name="password" required minlength="8" placeholder="Password (min 8)" class="border rounded-lg px-3 py-2">
+    <select name="role" class="border rounded-lg px-3 py-2"><option value="guru">Guru</option><option value="kepala_sekolah">Kepala Sekolah</option><option value="admin_tu">Admin TU</option></select>
+    <input name="nip" placeholder="NIP (opsional)" class="border rounded-lg px-3 py-2">
+    <button class="bg-green-700 text-white px-4 py-2 rounded-lg">+ Buat Akun</button>
+</form>
+<div class="bg-white rounded-xl shadow overflow-x-auto">
+    <table class="w-full text-sm">
+        <thead><tr class="bg-slate-100 text-left"><th class="px-4 py-3">Nama</th><th class="px-4 py-3">Email</th><th class="px-4 py-3">Role</th><th class="px-4 py-3">Status</th><th class="px-4 py-3">Aksi</th></tr></thead>
+        <tbody>
+        @foreach ($pengguna as $u)
+            <tr class="border-t"><td class="px-4 py-3 font-semibold">{{ $u->name }}</td><td class="px-4 py-3">{{ $u->email }}</td><td class="px-4 py-3">{{ $u->roleLabel() }}</td><td class="px-4 py-3">{{ $u->is_active ? 'Aktif' : 'Nonaktif' }}</td><td class="px-4 py-3 whitespace-nowrap"><form method="POST" action="{{ route('admin.pengguna.toggle', $u) }}" class="inline">@csrf<button class="text-blue-700">{{ $u->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button></form> | <form method="POST" action="{{ route('admin.pengguna.destroy', $u) }}" class="inline" onsubmit="return confirm('Hapus akun ini?')">@csrf @method('DELETE')<button class="text-red-700">Hapus</button></form></td></tr>
+        @endforeach
+        </tbody>
+    </table>
+</div>
+<div class="mt-4">{{ $pengguna->links() }}</div>
+@endsection
