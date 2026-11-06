@@ -25,6 +25,7 @@
             <a href="{{ route('admin.buku-induk.nominatif') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Data Nominatif</a>
             <a href="{{ route('admin.buku-induk.ledger') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Ledger Semester</a>
             <a href="{{ route('admin.buku-induk.transkrip') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Transkrip</a>
+            <a href="{{ route('admin.nilai.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Input Nilai</a>
             <p class="px-3 pt-3 pb-1 text-xs uppercase text-green-400">Konten Publik</p>
             <a href="{{ route('admin.berita.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Berita</a>
             <a href="{{ route('admin.profil.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Profil Sekolah</a>
@@ -34,6 +35,7 @@
                 <a href="{{ route('admin.tahun-ajaran.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Tahun Ajaran</a>
                 <a href="{{ route('admin.jurusan.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Jurusan</a>
                 <a href="{{ route('admin.kelas.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Kelas</a>
+                <a href="{{ route('admin.mapel.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Mata Pelajaran</a>
                 <a href="{{ route('admin.data-sekolah.edit') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Data Sekolah</a>
                 <a href="{{ route('admin.pengguna.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Pengguna</a>
                 <a href="{{ route('admin.log.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Log Aktivitas</a>

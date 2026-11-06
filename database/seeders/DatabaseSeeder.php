@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             TahunAjaranSeeder::class,
             JurusanSeeder::class,
+            MapelSeeder::class,
             KelasSeeder::class,
             DataSekolahSeeder::class,
             ProfilSekolahSeeder::class,

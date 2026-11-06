@@ -313,6 +313,38 @@ CREATE TABLE IF NOT EXISTS `activity_logs` (
   CONSTRAINT `activity_logs_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `mapel` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `kode` varchar(20) DEFAULT NULL,
+  `nama` varchar(150) NOT NULL,
+  `kelompok` enum('A','B','C1','C2','C3') NOT NULL,
+  `jurusan_id` bigint UNSIGNED DEFAULT NULL,
+  `tingkat` enum('X','XI','XII') DEFAULT NULL,
+  `urutan` int NOT NULL DEFAULT 0,
+  `kkm_default` decimal(5,2) NOT NULL DEFAULT 76.00,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  UNIQUE KEY `mapel_nama_jurusan_tingkat_unique` (`nama`, `jurusan_id`, `tingkat`),
+  CONSTRAINT `mapel_jurusan_id_foreign` FOREIGN KEY (`jurusan_id`) REFERENCES `jurusan` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `nilai` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `siswa_id` bigint UNSIGNED NOT NULL,
+  `mapel_id` bigint UNSIGNED NOT NULL,
+  `tahun_ajaran_id` bigint UNSIGNED NOT NULL,
+  `semester` tinyint UNSIGNED NOT NULL,
+  `kkm` decimal(5,2) DEFAULT NULL,
+  `nilai_angka` decimal(5,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  UNIQUE KEY `nilai_unik` (`siswa_id`, `mapel_id`, `tahun_ajaran_id`, `semester`),
+  INDEX `nilai_mapel_tahun_semester_index` (`mapel_id`, `tahun_ajaran_id`, `semester`),
+  CONSTRAINT `nilai_siswa_id_foreign` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `nilai_mapel_id_foreign` FOREIGN KEY (`mapel_id`) REFERENCES `mapel` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `nilai_tahun_ajaran_id_foreign` FOREIGN KEY (`tahun_ajaran_id`) REFERENCES `tahun_ajaran` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `migrations` (
   `id` int UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `migration` varchar(255) NOT NULL,

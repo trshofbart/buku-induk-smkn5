@@ -46,8 +46,59 @@ class Siswa extends Model
     public function orangTua() { return $this->hasOne(OrangTua::class); }
     public function riwayatKelas() { return $this->hasMany(RiwayatKelas::class)->orderByDesc('created_at'); }
     public function ledger() { return $this->hasMany(Ledger::class)->orderBy('semester'); }
+    public function nilai() { return $this->hasMany(Nilai::class); }
     public function transkrip() { return $this->hasMany(Transkrip::class); }
     public function dokumen() { return $this->hasMany(DokumenSiswa::class); }
+
+    /**
+     * Data laporan penilaian per tingkat mengikuti HAL_PRINT file MASTER:
+     * ['X' => ['tahun', 'smt1' => Ledger, 'smt2' => Ledger,
+     *   'kelompok' => ['A' => [['mapel', 'smt1' => Nilai, 'smt2' => Nilai], ...], ...]], ...]
+     */
+    public function laporanNilai(): array
+    {
+        $this->loadMissing(['nilai.mapel', 'nilai.tahunAjaran', 'ledger.tahunAjaran']);
+        $perSemester = $this->ledger->keyBy('semester');
+        $nilaiByMapelSemester = $this->nilai->groupBy(fn ($n) => $n->mapel_id.'-'.$n->semester);
+
+        $out = [];
+        foreach (['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]] as $tingkat => $smts) {
+            // Tahun diklat: dari tahun ajaran semester itu di data nilai
+            // (lebih tepat), baru fallback ke ledger.
+            $tahun = null;
+            foreach ($smts as $s) {
+                $n = $this->nilai->firstWhere('semester', $s);
+                if ($n?->tahunAjaran) {
+                    $tahun = $n->tahunAjaran->nama;
+                    break;
+                }
+            }
+            if (! $tahun) {
+                foreach ($smts as $s) {
+                    if (($perSemester[$s] ?? null)?->tahunAjaran) {
+                        $tahun = $perSemester[$s]->tahunAjaran->nama;
+                        break;
+                    }
+                }
+            }
+            $kelompok = [];
+            foreach (Mapel::untukJurusan($this->jurusan_id)->untukTingkat($tingkat)->terurut()->get() as $m) {
+                $kelompok[$m->kelompok][] = [
+                    'mapel' => $m,
+                    'smt1' => $nilaiByMapelSemester->get($m->id.'-'.$smts[0])?->first(),
+                    'smt2' => $nilaiByMapelSemester->get($m->id.'-'.$smts[1])?->first(),
+                ];
+            }
+            $out[$tingkat] = [
+                'tahun' => $tahun,
+                'smt1' => $perSemester[$smts[0]] ?? null,
+                'smt2' => $perSemester[$smts[1]] ?? null,
+                'kelompok' => $kelompok,
+            ];
+        }
+
+        return $out;
+    }
 
     // --- Scope untuk pencarian & filter (dipakai controller) ---
     public function scopeCari($query, ?string $q)

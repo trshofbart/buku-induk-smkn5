@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\DataSekolah;
 use App\Models\Jurusan;
 use App\Models\Kelas;
+use App\Models\Mapel;
 use App\Models\TahunAjaran;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -103,6 +104,41 @@ class MasterController extends Controller
         }
         $kelas->delete();
         return back()->with('status', 'Kelas berhasil dihapus.');
+    }
+
+    // ---------- Mata Pelajaran ----------
+    public function mapelIndex()
+    {
+        return view('admin.master.mapel', [
+            'mapel' => Mapel::with('jurusan')->orderBy('kelompok')->orderBy('urutan')->paginate(25),
+            'jurusan' => Jurusan::orderBy('nama')->get(),
+        ]);
+    }
+
+    public function mapelStore(Request $request)
+    {
+        $data = $request->validate([
+            'nama' => 'required|string|max:150',
+            'kelompok' => 'required|in:A,B,C1,C2,C3',
+            'jurusan_id' => 'nullable|exists:jurusan,id',
+            'tingkat' => 'nullable|in:X,XI,XII',
+            'urutan' => 'nullable|integer|min:0',
+            'kkm_default' => 'nullable|numeric|min:0|max:100',
+        ]);
+        Mapel::updateOrCreate(
+            ['nama' => $data['nama'], 'jurusan_id' => $data['jurusan_id'] ?? null, 'tingkat' => $data['tingkat'] ?? null],
+            $data
+        );
+        return back()->with('status', 'Mata pelajaran berhasil ditambahkan.');
+    }
+
+    public function mapelDestroy(Mapel $mapel)
+    {
+        if ($mapel->nilai()->exists()) {
+            return back()->withErrors(['mapel' => 'Mapel ini sudah dipakai data nilai, tidak bisa dihapus.']);
+        }
+        $mapel->delete();
+        return back()->with('status', 'Mata pelajaran berhasil dihapus.');
     }
 
     // ---------- Data Sekolah ----------

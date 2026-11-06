@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BeritaAdminController;
 use App\Http\Controllers\Admin\BukuIndukController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MasterController;
+use App\Http\Controllers\Admin\NilaiController;
 use App\Http\Controllers\Admin\PengumumanAdminController;
 use App\Http\Controllers\Admin\ProfilAdminController;
 use App\Http\Controllers\Admin\SiswaController;
@@ -46,6 +47,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/siswa/import', [SiswaController::class, 'importForm'])->name('siswa.import')->middleware('role:admin_tu');
     Route::post('/siswa/import', [SiswaController::class, 'importStore'])->name('siswa.import.store')->middleware('role:admin_tu');
     Route::get('/siswa/{siswa}/cetak', [SiswaController::class, 'cetak'])->name('siswa.cetak');
+    Route::get('/siswa/{siswa}/transkrip-nilai', [NilaiController::class, 'transkrip'])->name('nilai.transkrip');
     Route::resource('siswa', SiswaController::class)->except(['show'])->middleware('role:admin_tu,kepala_sekolah,guru');
     // Catatan: resource di atas dibatasi role lewat middleware grup;
     // aksi ubah (create/store/edit/update/destroy) dijaga ulang di controller (canEdit = Admin TU).
@@ -59,6 +61,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::post('/buku-induk/ledger', [BukuIndukController::class, 'ledgerStore'])->name('buku-induk.ledger.store')->middleware('role:admin_tu');
     Route::get('/buku-induk/transkrip', [BukuIndukController::class, 'transkrip'])->name('buku-induk.transkrip');
     Route::post('/buku-induk/transkrip', [BukuIndukController::class, 'transkripStore'])->name('buku-induk.transkrip.store')->middleware('role:admin_tu');
+
+    // --- Input Nilai per mapel / semester / tahun ajaran ---
+    Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai.index')->middleware('role:admin_tu,kepala_sekolah,guru');
+    Route::post('/nilai', [NilaiController::class, 'store'])->name('nilai.store')->middleware('role:admin_tu');
 
     // --- Berita / Profil / Pengumuman (kelola konten publik) ---
     Route::resource('berita', BeritaAdminController::class)->except(['show'])->middleware('role:admin_tu');
@@ -81,6 +87,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/kelas', [MasterController::class, 'kelasIndex'])->name('kelas.index');
         Route::post('/kelas', [MasterController::class, 'kelasStore'])->name('kelas.store');
         Route::delete('/kelas/{kelas}', [MasterController::class, 'kelasDestroy'])->name('kelas.destroy');
+
+        Route::get('/mapel', [MasterController::class, 'mapelIndex'])->name('mapel.index');
+        Route::post('/mapel', [MasterController::class, 'mapelStore'])->name('mapel.store');
+        Route::delete('/mapel/{mapel}', [MasterController::class, 'mapelDestroy'])->name('mapel.destroy');
 
         Route::get('/data-sekolah', [MasterController::class, 'dataSekolahEdit'])->name('data-sekolah.edit');
         Route::put('/data-sekolah', [MasterController::class, 'dataSekolahUpdate'])->name('data-sekolah.update');

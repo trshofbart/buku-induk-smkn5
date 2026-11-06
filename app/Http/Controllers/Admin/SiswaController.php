@@ -230,29 +230,10 @@ class SiswaController extends Controller
     {
         $siswa->load(['jurusan', 'kelas', 'tahunAjaran', 'orangTua', 'ledger.tahunAjaran', 'transkrip']);
 
-        // Ledger dikelompokkan per tingkat mengikuti HAL_PRINT file MASTER:
-        // X = semester 1-2, XI = 3-4, XII = 5-6, beserta tahun diklatnya.
-        $perSemester = $siswa->ledger->keyBy('semester');
-        $tingkatData = [];
-        foreach (['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]] as $tingkat => $smts) {
-            $tahun = null;
-            foreach ($smts as $s) {
-                if (($perSemester[$s] ?? null)?->tahunAjaran) {
-                    $tahun = $perSemester[$s]->tahunAjaran->nama;
-                    break;
-                }
-            }
-            $tingkatData[$tingkat] = [
-                'tahun' => $tahun,
-                'smt1' => $perSemester[$smts[0]] ?? null,
-                'smt2' => $perSemester[$smts[1]] ?? null,
-            ];
-        }
-
         return view('admin.siswa.cetak', [
             'siswa' => $siswa,
             'sekolah' => \App\Models\DataSekolah::get(),
-            'tingkatData' => $tingkatData,
+            'laporan' => $siswa->laporanNilai(),
         ]);
     }
 

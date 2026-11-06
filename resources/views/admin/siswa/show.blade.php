@@ -7,6 +7,7 @@
         <a href="{{ route('admin.siswa.edit', $siswa) }}" class="bg-green-700 text-white text-sm px-3 py-2 rounded-lg">Edit</a>
     @endif
     <a href="{{ route('admin.siswa.cetak', $siswa) }}" class="bg-white border text-sm px-3 py-2 rounded-lg">Cetak</a>
+    <a href="{{ route('admin.nilai.transkrip', $siswa) }}" class="bg-white border text-sm px-3 py-2 rounded-lg">Transkrip Nilai</a>
     <a href="{{ route('admin.siswa.index') }}" class="bg-white border text-sm px-3 py-2 rounded-lg">&larr; Kembali</a>
 </div>
 

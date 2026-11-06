@@ -297,3 +297,35 @@ diimport ke tabel `activity_logs` (aksi `import`). Log detail per baris tersimpa
 - Isi file-file "butuh keputusan manual" di atas (terutama 4 Buku Induk terenkripsi) —
   menunggu keputusan/petunjuk sekolah.
 - Status jurusan lama (TGB/TKB/TKK, TKJ) — menunggu konfirmasi sekolah.
+
+## Import nilai per mata pelajaran (2026-11-06, tambahan)
+
+Sumber: sheet SMSTR 1-6 file MASTER 2021-2022 (TEI + RPL A) dan sheet LEGGER
+file MASTER 2020-2021. Skrip: `storage/imports/import_nilai_smstr.py`
+(idempotent — bisa dijalankan ulang).
+
+- Nilai yang diambil = nilai **Pengetahuan** (kolom pertama tiap blok mapel),
+  sama dengan kolom NILAI di HAL_PRINT. Bukan kolom R (rata-rata).
+  Struktur blok berbeda per semester: SMSTR 1 = 5 kolom, SMSTR 2 = 4 kolom,
+  SMSTR 3-6 = 3 kolom (P/K/R).
+- KKM = 76 (dari HAL_PRINT). Huruf tidak disimpan — dihitung aplikasi dengan
+  skala sekolah yang diturunkan dari data SMSTR sendiri:
+  A ≥ 92, B 84-91, C 76-83, D < 76 (C mulai tepat di KKM).
+- Semester 1-2 → 2019/2020, 3-4 → 2020/2021, 5-6 → 2021/2022 (TEI/RPL A);
+  LEGGER: 1-2 → 2018/2019, 3-4 → 2019/2020, 5-6 → 2020/2021.
+
+Hasil: **4.020 nilai untuk 106 siswa** (0 NIS tidak cocok, 0 mapel tidak cocok).
+- TEI 2021-2022: 2.736 nilai (36 siswa + siswa pindahan di semester lanjut).
+- RPL A 2021-2022: 1.020 nilai (34 siswa, hanya semester 1-2 — sheet SMSTR 3-6
+  di file ini kosong, hanya berisi formula identitas tanpa nilai).
+- LEGGER 2020-2021: 264 nilai (41 siswa; hampir semuanya PABP — kolom mapel
+  lain di file ini memang belum diisi sekolah).
+
+Verifikasi: 5/5 spot-check lawan HAL_PRINT cocok (NIS 20016 PAI smt 1=81,
+smt 2=80, smt 3=77, smt 5=83; NIS 20013 PAI smt 1=94). Rata-rata ledger
+sekolah = rata-rata kolom R SMSTR (contoh NIS 20013 smt 1 = 87,39) — footer
+RATA-RATA di cetak/transkrip tetap memakai ledger, jadi konsisten dengan
+buku sekolah.
+
+Catatan: nilai Keterampilan (Ket) ada di file SMSTR tapi tidak dipakai —
+form HAL_PRINT hanya punya satu kolom NILAI (Pengetahuan).
