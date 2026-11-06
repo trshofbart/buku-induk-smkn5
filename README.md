@@ -78,13 +78,22 @@ Alternatif tanpa artisan: import file `schema.sql` langsung lewat phpMyAdmin (st
 
 ## Instalasi di shared hosting (cPanel)
 
+**Cara 1 (paling mudah) — seluruh proyek di `public_html`, tanpa `/public` di URL:**
+Proyek ini sudah punya file `.htaccess` di folder root yang meneruskan semua
+request ke `public/`, jadi tidak perlu memisah folder atau mengubah path.
+1. Upload seluruh isi proyek ke `public_html/` (atau ke subfolder, mis. `public_html/buku-induk/`).
+2. Buat database MySQL + user di cPanel → isi `DB_*` di `.env` (di hosting, edit file `.env` lewat File Manager).
+3. Set `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://domain-sekolah.sch.id`.
+4. Jalankan migrasi lewat Terminal cPanel / SSH: `php artisan migrate --seed --force`.
+   Kalau tidak ada SSH: import `schema.sql` lewat phpMyAdmin, lalu jalankan seeder dari Terminal.
+5. Pastikan folder `storage/` dan `bootstrap/cache/` bisa ditulis (permission 775).
+6. Buka `https://domain-sekolah.sch.id` — langsung tampil tanpa `/public` di URL.
+   (Syarat: Apache dengan `mod_rewrite` aktif — standar di cPanel, Laragon, dan XAMPP.)
+
+**Cara 2 (alternatif lama) — pisah folder `public/`:**
 1. Upload isi folder proyek ke hosting (di luar `public_html` bila memungkinkan), kecuali folder `public/` → isi `public/` di-upload ke `public_html/`.
 2. Di `public/index.php` sesuaikan path ke `vendor/autoload.php` dan `bootstrap/app.php` bila lokasi folder berubah.
-3. Buat database MySQL + user di cPanel → isi `DB_*` di `.env` (di hosting, edit file `.env` lewat File Manager).
-4. Set `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://domain-sekolah.sch.id`.
-5. Jalankan migrasi lewat Terminal cPanel / SSH: `php artisan migrate --seed --force`.
-   Kalau tidak ada SSH: import `schema.sql` lewat phpMyAdmin, lalu jalankan seeder dari Terminal.
-6. Pastikan folder `storage/` dan `bootstrap/cache/` bisa ditulis (permission 775).
+3. Lanjutkan langkah 2–5 di atas.
 
 ## Instalasi di Linux (Ubuntu)
 

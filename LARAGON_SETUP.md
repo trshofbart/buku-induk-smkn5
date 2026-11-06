@@ -15,6 +15,14 @@ jadi **tidak perlu `composer install`**. Yang perlu disiapkan hanya database MyS
    `C:\laragon\www\buku-induk-smkn5`
 2. Di Laragon, klik **Stop** lalu **Start All** (atau klik kanan > Reload Apache).
    Laragon otomatis membuat alamat: **http://buku-induk-smkn5.test**
+   (tanpa `/public` — Laragon mengarahkan docroot langsung ke `public/`).
+
+> Catatan: kalau proyek dibuka lewat `http://localhost/buku-induk-smkn5`
+> (bukan lewat `.test`), URL tanpa `/public` juga tetap jalan — ada file
+> `.htaccess` di folder root proyek yang meneruskan semua request ke
+> `public/`. File yang sama membuat proyek bisa diletakkan langsung di
+> `public_html` shared hosting tanpa `/public` di URL (lihat README,
+> bagian "Instalasi di shared hosting").
 
 ## Langkah 2 — Buat database
 

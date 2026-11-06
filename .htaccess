@@ -1,0 +1,30 @@
+# Buku Induk SMKN 5 — akses tanpa /public di URL.
+#
+# Cara kerja:
+# - Bila docroot server sudah mengarah ke public/ (mis. Laragon, virtual host
+#   yang benar), file ini tidak terbaca dan tidak berpengaruh apa-apa.
+# - Bila docroot mengarah ke folder proyek ini (mis. public_html di shared
+#   hosting, atau htdocs/buku-induk-smkn5 di XAMPP), semua request
+#   diteruskan ke public/ sehingga situs bisa dibuka di URL root,
+#   tanpa /public — contoh: http://localhost/buku-induk-smkn5
+#   atau https://domain.sch.id
+#
+# Struktur folder Laravel TIDAK diubah (public/ tetap docroot yang benar);
+# file ini hanya jembatan supaya hosting yang docroot-nya tidak bisa
+# diubah tetap bisa membuka aplikasi di URL root.
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Blokir akses langsung ke file/folder sensitif (bukan lewat public/).
+    # /storage TIDAK diblokir: itu jalur file publik via symlink
+    # public/storage (foto berita, dokumen siswa).
+    RewriteRule ^(\.env|\.git|vendor|database|config|app|bootstrap|resources|routes|tests|node_modules)(/|$) - [F,L]
+    RewriteRule ^(composer\.(json|lock)|artisan|phpunit\.xml.*|\.htaccess)$ - [F,L]
+
+    # Teruskan semua request ke public/ (kecuali yang sudah ke public/).
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
