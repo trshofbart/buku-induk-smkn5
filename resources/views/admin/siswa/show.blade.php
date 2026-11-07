@@ -8,6 +8,11 @@
     @endif
     <a href="{{ route('admin.siswa.cetak', $siswa) }}" class="bg-white border text-sm px-3 py-2 rounded-lg">Cetak</a>
     <a href="{{ route('admin.nilai.transkrip', $siswa) }}" class="bg-white border text-sm px-3 py-2 rounded-lg">Transkrip Nilai</a>
+    <form method="GET" action="{{ route('admin.siswa.rapor', $siswa) }}" class="inline-flex gap-1 bg-white border rounded-lg px-2 py-1 text-sm items-center">
+        <label class="text-slate-500">Rapor</label>
+        <select name="semester" class="border rounded px-1 py-1">@for ($i = 1; $i <= 6; $i++)<option value="{{ $i }}">Smt {{ $i }}</option>@endfor</select>
+        <button class="bg-green-700 text-white px-2 py-1 rounded">Cetak</button>
+    </form>
     <a href="{{ route('admin.siswa.index') }}" class="bg-white border text-sm px-3 py-2 rounded-lg">&larr; Kembali</a>
 </div>
 

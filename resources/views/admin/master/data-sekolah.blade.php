@@ -12,7 +12,14 @@
         <div><label class="text-sm font-semibold">Email</label><input type="email" name="email" value="{{ old('email', $sekolah->email) }}" class="w-full border rounded-lg px-3 py-2"></div>
         <div><label class="text-sm font-semibold">Website</label><input name="website" value="{{ old('website', $sekolah->website) }}" class="w-full border rounded-lg px-3 py-2"></div>
         <div><label class="text-sm font-semibold">Kepala Sekolah</label><input name="kepala_sekolah" value="{{ old('kepala_sekolah', $sekolah->kepala_sekolah) }}" class="w-full border rounded-lg px-3 py-2"></div>
+        <div><label class="text-sm font-semibold">Bidang Studi Keahlian *</label><input name="bidang_studi_keahlian" value="{{ old('bidang_studi_keahlian', $sekolah->bidang_studi_keahlian) }}" required class="w-full border rounded-lg px-3 py-2"></div>
+        <div><label class="text-sm font-semibold">Tempat Tanda Tangan Rapor</label><input name="tempat_ttd" value="{{ old('tempat_ttd', $sekolah->tempat_ttd) }}" placeholder="Surakarta" class="w-full border rounded-lg px-3 py-2"></div>
+        <div><label class="text-sm font-semibold">Tanggal Rapor</label><input type="date" name="tanggal_rapor" value="{{ old('tanggal_rapor', $sekolah->tanggal_rapor?->format('Y-m-d')) }}" class="w-full border rounded-lg px-3 py-2"></div>
     </div>
+    <label class="flex items-start gap-2 text-sm bg-slate-50 border rounded-lg px-3 py-2">
+        <input type="checkbox" name="input_nilai_dibuka" value="1" {{ old('input_nilai_dibuka', $sekolah->input_nilai_dibuka) ? 'checked' : '' }} class="mt-0.5">
+        <span><strong>Input nilai dibuka</strong> — bila tidak dicentang, Admin tidak bisa menyimpan atau mengimport nilai (kunci ala e-Rapor) sampai dibuka kembali.</span>
+    </label>
     <button class="bg-green-700 text-white px-4 py-2 rounded-lg">Simpan</button>
 </form>
 @endsection

@@ -234,6 +234,49 @@ class SiswaController extends Controller
             'siswa' => $siswa,
             'sekolah' => \App\Models\DataSekolah::get(),
             'laporan' => $siswa->laporanNilai(),
+            // Kunci nomor semester absolut (X: 1-2, XI: 3-4, XII: 5-6).
+            'kelengkapan' => $siswa->kelengkapan()->get()->keyBy('semester'),
+            'ekstrakurikuler' => $siswa->ekstrakurikuler()->get()->groupBy('semester'),
+        ]);
+    }
+
+    /** Rapor satu semester ala e-Rapor: nilai + kehadiran + ekskul + catatan wali kelas. */
+    public function rapor(Request $request, Siswa $siswa)
+    {
+        $tahun = $request->filled('tahun_ajaran_id')
+            ? \App\Models\TahunAjaran::findOrFail($request->tahun_ajaran_id)
+            : \App\Models\TahunAjaran::aktif();
+        $semester = max(1, min(8, (int) ($request->semester ?? 1)));
+        $tingkat = $semester <= 2 ? 'X' : ($semester <= 4 ? 'XI' : 'XII');
+
+        $siswa->load(['jurusan', 'kelas', 'tahunAjaran', 'orangTua']);
+        $mapel = \App\Models\Mapel::untukJurusanTingkat($siswa->jurusan_id, $tingkat);
+        $nilai = \App\Models\Nilai::where('siswa_id', $siswa->id)
+            ->where('tahun_ajaran_id', $tahun?->id)
+            ->where('semester', $semester)
+            ->whereIn('mapel_id', $mapel->pluck('id'))
+            ->get()->keyBy('mapel_id');
+        $ledger = \App\Models\Ledger::where('siswa_id', $siswa->id)
+            ->where('semester', $semester)
+            ->orderBy('id')->first();
+        $kelengkapan = \App\Models\Kelengkapan::where('siswa_id', $siswa->id)
+            ->where('tahun_ajaran_id', $tahun?->id)
+            ->where('semester', $semester)->first();
+        $ekskul = \App\Models\Ekstrakurikuler::where('siswa_id', $siswa->id)
+            ->where('tahun_ajaran_id', $tahun?->id)
+            ->where('semester', $semester)->orderBy('kegiatan')->get();
+
+        return view('admin.siswa.rapor', [
+            'siswa' => $siswa,
+            'sekolah' => \App\Models\DataSekolah::get(),
+            'tahun' => $tahun,
+            'semester' => $semester,
+            'tingkat' => $tingkat,
+            'mapel' => $mapel,
+            'nilai' => $nilai,
+            'ledger' => $ledger,
+            'kelengkapan' => $kelengkapan,
+            'ekskul' => $ekskul,
         ]);
     }
 

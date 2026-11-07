@@ -58,17 +58,23 @@
 <div class="halaman-baru"></div>
 @include('admin.siswa._laporan-nilai', ['siswa' => $siswa, 'laporan' => $laporan])
 
-{{-- Ekstrakurikuler --}}
+{{-- Ekstrakurikuler — halaman sendiri, terpisah dari transkrip nilai. --}}
+<div class="halaman-baru"></div>
 <p class="subjudul">KEGIATAN EKSTRAKURIKULER / PENGEMBANGAN DIRI</p>
 <table class="nilai">
     <thead><tr><th style="width:60px;">TINGKAT</th><th style="width:70px;">SEMESTER</th><th>KEGIATAN EKSTRAKURIKULER / PENGEMBANGAN DIRI</th><th style="width:60px;">NILAI</th><th style="width:25%;">KETERANGAN</th></tr></thead>
     <tbody>
         @foreach (['X', 'XI', 'XII'] as $tingkat)
             @foreach ([1, 2] as $smt)
+                @php
+                    $smtAbs = ['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]][$tingkat][$smt - 1];
+                    $daftarEkskul = ($ekstrakurikuler[$smtAbs] ?? collect())->values();
+                @endphp
                 @for ($i = 1; $i <= 3; $i++)
+                    @php $e = $daftarEkskul->get($i - 1); @endphp
                     <tr>
                         @if ($i === 1)<td class="tengah" rowspan="3">{{ $tingkat }}</td><td class="tengah" rowspan="3">{{ $smt }}</td>@endif
-                        <td class="tinggi">{{ $i }}.&nbsp;</td><td></td><td></td>
+                        <td class="tinggi">{{ $i }}.&nbsp;{{ $e?->kegiatan ?? '' }}</td><td>{{ $e?->nilai ?? '' }}</td><td>{{ $e?->keterangan ?? '' }}</td>
                     </tr>
                 @endfor
             @endforeach
@@ -86,9 +92,13 @@
     <tbody>
         @foreach (['X', 'XI', 'XII'] as $tingkat)
             @foreach ([1, 2] as $smt)
+                @php
+                    $smtAbs = ['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]][$tingkat][$smt - 1];
+                    $k = $kelengkapan[$smtAbs] ?? null;
+                @endphp
                 <tr>
                     @if ($smt === 1)<td class="tengah" rowspan="2">{{ $tingkat }}</td>@endif
-                    <td class="tengah">{{ $smt }}</td><td class="tinggi"></td><td></td><td></td>
+                    <td class="tengah">{{ $smt }}</td><td class="tinggi">{{ $k?->kelakuan ?? '' }}</td><td>{{ $k?->kerapian ?? '' }}</td><td>{{ $k?->kerajinan ?? '' }}</td>
                 </tr>
             @endforeach
         @endforeach
@@ -105,9 +115,13 @@
     <tbody>
         @foreach (['X', 'XI', 'XII'] as $tingkat)
             @foreach ([1, 2] as $smt)
+                @php
+                    $smtAbs = ['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]][$tingkat][$smt - 1];
+                    $k = $kelengkapan[$smtAbs] ?? null;
+                @endphp
                 <tr>
                     @if ($smt === 1)<td class="tengah" rowspan="2">{{ $tingkat }}</td>@endif
-                    <td class="tengah">{{ $smt }}</td><td class="tinggi"></td>
+                    <td class="tengah">{{ $smt }}</td><td class="tinggi">{{ $k?->akhlak ?? '' }}</td>
                 </tr>
             @endforeach
         @endforeach
@@ -123,9 +137,13 @@
     <tbody>
         @foreach (['X', 'XI', 'XII'] as $tingkat)
             @foreach ([1, 2] as $smt)
+                @php
+                    $smtAbs = ['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]][$tingkat][$smt - 1];
+                    $k = $kelengkapan[$smtAbs] ?? null;
+                @endphp
                 <tr>
                     @if ($smt === 1)<td class="tengah" rowspan="2">{{ $tingkat }}</td>@endif
-                    <td class="tengah">{{ $smt }}</td><td class="tinggi"></td><td></td><td></td>
+                    <td class="tengah">{{ $smt }}</td><td class="tinggi">{{ $k?->sakit ?? '' }}</td><td>{{ $k?->izin ?? '' }}</td><td>{{ $k?->alpa ?? '' }}</td>
                 </tr>
             @endforeach
         @endforeach
@@ -139,9 +157,13 @@
     <tbody>
         @foreach (['X', 'XI', 'XII'] as $tingkat)
             @foreach ([1, 2] as $smt)
+                @php
+                    $smtAbs = ['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]][$tingkat][$smt - 1];
+                    $k = $kelengkapan[$smtAbs] ?? null;
+                @endphp
                 <tr>
                     @if ($smt === 1)<td class="tengah" rowspan="2">{{ $tingkat }}</td>@endif
-                    <td class="tengah">{{ $smt }}</td><td class="tinggi">Naik ke &hellip;&hellip;&hellip;&nbsp;&nbsp; Tingkat &hellip;&hellip;&hellip;</td><td></td><td></td>
+                    <td class="tengah">{{ $smt }}</td><td class="tinggi">@if ($k?->kenaikan){{ $k->kenaikan }}@else Naik ke &hellip;&hellip;&hellip;&nbsp;&nbsp; Tingkat &hellip;&hellip;&hellip;@endif</td><td></td><td></td>
                 </tr>
             @endforeach
         @endforeach
@@ -164,13 +186,17 @@
     <thead><tr><th style="width:60px;">TINGKAT</th><th>CATATAN</th></tr></thead>
     <tbody>
         @foreach (['X', 'XI', 'XII'] as $tingkat)
-            <tr><td class="tengah">{{ $tingkat }}</td><td style="height:34px;"></td></tr>
+            @php
+                $smtGenap = ['X' => 2, 'XI' => 4, 'XII' => 6][$tingkat];
+                $catatan = $kelengkapan[$smtGenap]?->catatan ?? $kelengkapan[$smtGenap - 1]?->catatan ?? '';
+            @endphp
+            <tr><td class="tengah">{{ $tingkat }}</td><td style="height:34px;">{{ $catatan }}</td></tr>
         @endforeach
     </tbody>
 </table>
 
 {{-- Tanda tangan --}}
-<p style="text-align:right; margin-top:28px;">Surakarta, {{ now()->locale('id')->translatedFormat('d F Y') }}</p>
+<p style="text-align:right; margin-top:28px;">{{ $sekolah->tempat_ttd ?? 'Surakarta' }}, {{ ($sekolah->tanggal_rapor ?? now())->locale('id')->translatedFormat('d F Y') }}</p>
 <table class="ttd">
     <tr><td style="width:33%;">Kepala Sekolah</td><td style="width:33%;">Wali Kelas</td><td>Orang Tua / Wali</td></tr>
     <tr><td class="ruang"></td><td class="ruang"></td><td class="ruang"></td></tr>

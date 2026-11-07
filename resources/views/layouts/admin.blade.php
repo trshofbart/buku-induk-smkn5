@@ -24,6 +24,7 @@
             <a href="{{ route('admin.buku-induk.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Buku Induk</a>
             <a href="{{ route('admin.buku-induk.nominatif') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Data Nominatif</a>
             <a href="{{ route('admin.nilai.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Input Nilai</a>
+            <a href="{{ route('admin.kelengkapan.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Kelengkapan</a>
             <p class="px-3 pt-3 pb-1 text-xs uppercase text-green-400">Konten Publik</p>
             <a href="{{ route('admin.berita.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Berita</a>
             <a href="{{ route('admin.profil.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Profil Sekolah</a>

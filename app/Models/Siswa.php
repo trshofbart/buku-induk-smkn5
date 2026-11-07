@@ -49,6 +49,8 @@ class Siswa extends Model
     public function nilai() { return $this->hasMany(Nilai::class); }
     public function transkrip() { return $this->hasMany(Transkrip::class); }
     public function dokumen() { return $this->hasMany(DokumenSiswa::class); }
+    public function kelengkapan() { return $this->hasMany(Kelengkapan::class); }
+    public function ekstrakurikuler() { return $this->hasMany(Ekstrakurikuler::class); }
 
     /**
      * Data laporan penilaian per tingkat mengikuti HAL_PRINT file MASTER:
@@ -58,28 +60,35 @@ class Siswa extends Model
     public function laporanNilai(): array
     {
         $this->loadMissing(['nilai.mapel', 'nilai.tahunAjaran', 'ledger.tahunAjaran']);
-        $perSemester = $this->ledger->keyBy('semester');
         $nilaiByMapelSemester = $this->nilai->groupBy(fn ($n) => $n->mapel_id.'-'.$n->semester);
 
         $out = [];
         foreach (['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]] as $tingkat => $smts) {
-            // Tahun ajaran: dari tahun ajaran semester itu di data nilai
-            // (sesuai yang dipilih saat input nilai), baru fallback ke ledger.
-            $tahun = null;
+            // Tahun ajaran PER TINGKAT mengikuti isian nilai tingkat itu
+            // (bukan tahun kohort/ledger — ledger menyimpan tahun kohort
+            // untuk semua semester, jadi tidak bisa dipakai sebagai acuan).
+            // Tahun per semester = tahun ajaran yang paling sering muncul
+            // di nilai semester itu; tahun tingkat = tahun semester ganjil.
+            $tahunPerSemester = [];
             foreach ($smts as $s) {
-                $n = $this->nilai->firstWhere('semester', $s);
-                if ($n?->tahunAjaran) {
-                    $tahun = $n->tahunAjaran->nama;
-                    break;
-                }
+                $perTahun = $this->nilai->where('semester', $s)
+                    ->filter(fn ($n) => $n->tahunAjaran)
+                    ->countBy(fn ($n) => $n->tahunAjaran->nama);
+                $tahunPerSemester[$s] = $perTahun->isNotEmpty()
+                    ? $perTahun->sortDesc()->keys()->first()
+                    : null;
             }
-            if (! $tahun) {
-                foreach ($smts as $s) {
-                    if (($perSemester[$s] ?? null)?->tahunAjaran) {
-                        $tahun = $perSemester[$s]->tahunAjaran->nama;
-                        break;
-                    }
-                }
+            $tahun = $tahunPerSemester[$smts[0]] ?? $tahunPerSemester[$smts[1]];
+            // Ledger per semester: utamakan baris yang tahunnya cocok dengan
+            // tahun nilai semester itu (satu semester bisa punya beberapa
+            // baris ledger dari file sumber yang berbeda tahunnya).
+            $ledgerPerSemester = [];
+            foreach ($smts as $s) {
+                $rows = $this->ledger->where('semester', $s);
+                $cocok = $tahunPerSemester[$s]
+                    ? $rows->first(fn ($l) => $l->tahunAjaran?->nama === $tahunPerSemester[$s])
+                    : null;
+                $ledgerPerSemester[$s] = $cocok ?? $rows->first();
             }
             $kelompok = [];
             foreach (Mapel::untukJurusanTingkat($this->jurusan_id, $tingkat) as $m) {
@@ -91,8 +100,8 @@ class Siswa extends Model
             }
             $out[$tingkat] = [
                 'tahun' => $tahun,
-                'smt1' => $perSemester[$smts[0]] ?? null,
-                'smt2' => $perSemester[$smts[1]] ?? null,
+                'smt1' => $ledgerPerSemester[$smts[0]] ?? null,
+                'smt2' => $ledgerPerSemester[$smts[1]] ?? null,
                 'kelompok' => $kelompok,
             ];
         }

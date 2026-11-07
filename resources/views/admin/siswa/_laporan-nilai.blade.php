@@ -20,8 +20,8 @@
     <tr><td class="lbl">NAMA SISWA</td><td class="titik">:</td><td>{{ strtoupper($siswa->nama) }}</td></tr>
     <tr><td class="lbl">NOMOR INDUK SISWA</td><td class="titik">:</td><td>{{ $siswa->nis }}</td></tr>
     <tr><td class="lbl">NISN</td><td class="titik">:</td><td>{{ $siswa->nisn ?? '' }}</td></tr>
-    <tr><td class="lbl">BIDANG STUDI KEAHLIAN</td><td class="titik">:</td><td></td></tr>
-    <tr><td class="lbl">PROGRAM STUDI KEAHLIAN</td><td class="titik">:</td><td></td></tr>
+    <tr><td class="lbl">BIDANG STUDI KEAHLIAN</td><td class="titik">:</td><td>{{ strtoupper($sekolah->bidang_studi_keahlian ?? 'Teknologi dan Rekayasa') }}</td></tr>
+    <tr><td class="lbl">PROGRAM STUDI KEAHLIAN</td><td class="titik">:</td><td>{{ strtoupper($siswa->jurusan?->program_studi ?? $sekolah->bidang_studi_keahlian ?? 'Teknologi dan Rekayasa') }}</td></tr>
     <tr><td class="lbl">KOMPETENSI KEAHLIAN</td><td class="titik">:</td><td>{{ strtoupper($siswa->jurusan?->nama ?? '') }}</td></tr>
 </table>
 
@@ -38,45 +38,43 @@
             <tr>
                 <th rowspan="2" style="width:26px;">NO</th>
                 <th rowspan="2">MATA PELAJARAN</th>
-                <th colspan="3">SEMESTER : {{ $smtNo[0] }}</th>
-                <th colspan="3">SEMESTER : {{ $smtNo[1] }}</th>
+                <th colspan="2">SEMESTER : {{ $smtNo[0] }}</th>
+                <th colspan="2">SEMESTER : {{ $smtNo[1] }}</th>
             </tr>
             <tr>
-                <th>KKM *)</th><th>NILAI ANGKA</th><th>HURUF</th>
-                <th>KKM *)</th><th>NILAI ANGKA</th><th>HURUF</th>
+                <th>KKM *)</th><th>NILAI ANGKA</th>
+                <th>KKM *)</th><th>NILAI ANGKA</th>
             </tr>
         </thead>
         <tbody>
             @if (! empty($d['kelompok']))
                 @foreach ($d['kelompok'] as $kode => $baris)
-                    <tr class="grup"><td colspan="8">{{ \App\Models\Mapel::KELOMPOK[$kode] ?? $kode }}</td></tr>
+                    <tr class="grup"><td colspan="6">{{ \App\Models\Mapel::KELOMPOK[$kode] ?? $kode }}</td></tr>
                     @foreach ($baris as $i => $r)
                         <tr>
                             <td class="no">{{ $i + 1 }}</td>
                             <td>{{ $r['mapel']->nama }}</td>
                             <td class="angka">{{ rtrim(rtrim($r['smt1']?->kkm ?? $r['mapel']->kkm_default, '0'), '.') }}</td>
                             <td class="angka">{{ $r['smt1'] ? rtrim(rtrim($r['smt1']->nilai_angka, '0'), '.') : '&ndash;' }}</td>
-                            <td class="angka">{{ $r['smt1']?->nilai_huruf ?? '&ndash;' }}</td>
                             <td class="angka">{{ rtrim(rtrim($r['smt2']?->kkm ?? $r['mapel']->kkm_default, '0'), '.') }}</td>
                             <td class="angka">{{ $r['smt2'] ? rtrim(rtrim($r['smt2']->nilai_angka, '0'), '.') : '&ndash;' }}</td>
-                            <td class="angka">{{ $r['smt2']?->nilai_huruf ?? '&ndash;' }}</td>
                         </tr>
                     @endforeach
                 @endforeach
             @else
                 @foreach ($kelompokKosong as $kel)
-                    <tr class="grup"><td colspan="8">{{ $kel['judul'] }}</td></tr>
+                    <tr class="grup"><td colspan="6">{{ $kel['judul'] }}</td></tr>
                     @for ($i = 1; $i <= $kel['baris']; $i++)
-                        <tr><td class="no">{{ $i }}</td><td class="tinggi"></td><td class="angka"></td><td class="angka"></td><td class="angka"></td><td class="angka"></td><td class="angka"></td><td class="angka"></td></tr>
+                        <tr><td class="no">{{ $i }}</td><td class="tinggi"></td><td class="angka"></td><td class="angka"></td><td class="angka"></td><td class="angka"></td></tr>
                     @endfor
                 @endforeach
             @endif
             <tr>
                 <td colspan="2" style="text-align:right; font-weight:bold;">RATA-RATA</td>
-                <td class="angka"></td><td class="angka"><strong>{{ $d['smt1']?->rata_rata ?? '' }}</strong></td><td class="angka"></td>
-                <td class="angka"></td><td class="angka"><strong>{{ $d['smt2']?->rata_rata ?? '' }}</strong></td><td class="angka"></td>
+                <td class="angka"></td><td class="angka"><strong>{{ $d['smt1']?->rata_rata ?? '' }}</strong></td>
+                <td class="angka"></td><td class="angka"><strong>{{ $d['smt2']?->rata_rata ?? '' }}</strong></td>
             </tr>
         </tbody>
     </table>
 @endforeach
-<p class="catatan">*) KKM = Kriteria Ketuntasan Minimal. Predikat huruf mengikuti skala sekolah: A &ge; 92, B 84&ndash;91, C 76&ndash;83, D &lt; 76.</p>
+<p class="catatan">*) KKM = Kriteria Ketuntasan Minimal.</p>

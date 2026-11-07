@@ -59,6 +59,7 @@ class MasterController extends Controller
         $data = $request->validate([
             'kode' => 'required|string|max:10|unique:jurusan,kode',
             'nama' => 'required|string|max:100',
+            'program_studi' => 'nullable|string|max:100',
             'deskripsi' => 'nullable|string',
         ]);
         Jurusan::create($data);
@@ -201,7 +202,11 @@ class MasterController extends Controller
             'email' => 'nullable|email|max:100',
             'website' => 'nullable|string|max:100',
             'kepala_sekolah' => 'nullable|string|max:150',
+            'bidang_studi_keahlian' => 'required|string|max:100',
+            'tempat_ttd' => 'nullable|string|max:100',
+            'tanggal_rapor' => 'nullable|date',
         ]);
+        $data['input_nilai_dibuka'] = $request->boolean('input_nilai_dibuka');
         DataSekolah::get()->update($data);
         return back()->with('status', 'Data sekolah berhasil diperbarui.');
     }

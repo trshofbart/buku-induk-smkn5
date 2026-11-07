@@ -21,34 +21,6 @@ class Nilai extends Model
         ];
     }
 
-    /**
-     * Skala predikat (huruf) sekolah, diturunkan dari data master sendiri
-     * (sheet SMSTR 1-6 file MASTER 2021-2022, TEI + RPL A):
-     * A = 92-100, B = 84-91, C = 76-83, D < 76 (C mulai tepat di KKM 76).
-     */
-    public static function predikat(?float $angka): ?string
-    {
-        if ($angka === null) {
-            return null;
-        }
-        if ($angka >= 92) {
-            return 'A';
-        }
-        if ($angka >= 84) {
-            return 'B';
-        }
-        if ($angka >= 76) {
-            return 'C';
-        }
-
-        return 'D';
-    }
-
-    public function getNilaiHurufAttribute(): ?string
-    {
-        return static::predikat($this->nilai_angka !== null ? (float) $this->nilai_angka : null);
-    }
-
     public function getTuntasAttribute(): ?bool
     {
         if ($this->nilai_angka === null || $this->kkm === null) {

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\BeritaAdminController;
 use App\Http\Controllers\Admin\BukuIndukController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\KelengkapanController;
 use App\Http\Controllers\Admin\MasterController;
 use App\Http\Controllers\Admin\NilaiController;
 use App\Http\Controllers\Admin\PengumumanAdminController;
@@ -61,8 +62,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // --- Input Nilai per mapel / semester / tahun ajaran ---
     Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai.index')->middleware('role:admin_tu,kepala_sekolah,guru');
     Route::post('/nilai', [NilaiController::class, 'store'])->name('nilai.store')->middleware('role:admin_tu');
+    Route::post('/nilai/toggle-input', [NilaiController::class, 'toggleInput'])->name('nilai.toggle-input')->middleware('role:admin_tu');
     Route::get('/nilai/template', [NilaiController::class, 'template'])->name('nilai.template')->middleware('role:admin_tu,kepala_sekolah,guru');
     Route::post('/nilai/import', [NilaiController::class, 'import'])->name('nilai.import')->middleware('role:admin_tu');
+    Route::get('/nilai/leger', [NilaiController::class, 'leger'])->name('nilai.leger')->middleware('role:admin_tu,kepala_sekolah,guru');
+    Route::get('/siswa/{siswa}/rapor', [SiswaController::class, 'rapor'])->name('siswa.rapor')->middleware('role:admin_tu,kepala_sekolah,guru');
+
+    // --- Kelengkapan per semester (kehadiran, sikap, catatan, kenaikan, ekskul) ---
+    Route::get('/kelengkapan', [KelengkapanController::class, 'index'])->name('kelengkapan.index')->middleware('role:admin_tu,kepala_sekolah,guru');
+    Route::post('/kelengkapan', [KelengkapanController::class, 'store'])->name('kelengkapan.store')->middleware('role:admin_tu');
+    Route::post('/kelengkapan/ekstrakurikuler', [KelengkapanController::class, 'ekstrakurikulerStore'])->name('kelengkapan.ekstrakurikuler.store')->middleware('role:admin_tu');
+    Route::delete('/kelengkapan/ekstrakurikuler/{ekstrakurikuler}', [KelengkapanController::class, 'ekstrakurikulerDestroy'])->name('kelengkapan.ekstrakurikuler.destroy')->middleware('role:admin_tu');
 
     // --- Berita / Profil / Pengumuman (kelola konten publik) ---
     Route::resource('berita', BeritaAdminController::class)->except(['show'])->middleware('role:admin_tu');

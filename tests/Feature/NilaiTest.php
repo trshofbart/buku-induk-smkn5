@@ -19,18 +19,6 @@ class NilaiTest extends TestCase
         $this->seed();
     }
 
-    public function test_predikat_mengikuti_skala_sekolah_dari_file_master(): void
-    {
-        $this->assertSame('A', Nilai::predikat(92));
-        $this->assertSame('A', Nilai::predikat(98));
-        $this->assertSame('B', Nilai::predikat(91));
-        $this->assertSame('B', Nilai::predikat(84));
-        $this->assertSame('C', Nilai::predikat(83));
-        $this->assertSame('C', Nilai::predikat(76));
-        $this->assertSame('D', Nilai::predikat(75));
-        $this->assertNull(Nilai::predikat(null));
-    }
-
     public function test_admin_dapat_menginput_nilai_dan_rata_rata_ledger_terhitung(): void
     {
         $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
@@ -186,7 +174,8 @@ class NilaiTest extends TestCase
         $siswa = Siswa::whereNotNull('kelas_id')->firstOrFail();
 
         $res = $this->actingAs($admin)->get(route('admin.siswa.cetak', $siswa))->assertOk();
-        // 1 ganti halaman sebelum Laporan Penilaian + 1 sebelum XI + 1 sebelum XII.
-        $this->assertSame(3, substr_count($res->getContent(), '<div class="halaman-baru">'));
+        // 1 ganti halaman sebelum Laporan Penilaian + 1 sebelum XI + 1 sebelum XII
+        // + 1 sebelum Ekstrakurikuler (terpisah dari transkrip nilai).
+        $this->assertSame(4, substr_count($res->getContent(), '<div class="halaman-baru">'));
     }
 }

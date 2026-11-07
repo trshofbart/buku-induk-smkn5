@@ -457,3 +457,42 @@ jurusan. Tambah mapel langsung dari halaman ini (nama, kelompok C2/C3,
 tingkat, urutan, KKM); hapus hanya untuk mapel khusus (mapel umum dihapus
 dari menu Mata Pelajaran, karena berpengaruh ke semua jurusan). Cetakan
 memakai aturan `Mapel::untukJurusanTingkat` (lihat §12 poin 4).
+
+## 14. Alur e-Rapor SMK 2025.1 yang diadaptasi (2026-11-07)
+
+Riset Panduan Resmi e-Rapor SMK Versi 2025.1 (Direktorat SMK). Keputusan
+Bart: **KKM tetap, tanpa TP, predikat A–D dihapus, tanpa tarik data Dapodik**
+(import manual), **pengisian nilai hanya Admin TU** (tanpa guru mapel).
+Yang berubah:
+
+1. **Predikat A–D dihapus** — `Nilai::predikat()` dan kolom HURUF di
+   cetakan/transkrip dihapus; tabel nilai kini hanya KKM + Nilai Angka.
+2. **Buka/Tutup Input Nilai** (kunci ala e-Rapor) — checkbox di Data
+   Sekolah + tombol toggle di halaman Input Nilai. Saat ditutup, simpan
+   dan import nilai ditolak (403).
+3. **Data Sekolah** — field baru `bidang_studi_keahlian`
+   ("Teknologi dan Rekayasa", tampil di baris BIDANG STUDI KEAHLIAN
+   cetakan), `tempat_ttd` dan `tanggal_rapor` (blok tanda tangan cetakan).
+   Jurusan punya field baru `program_studi` (baris PROGRAM STUDI KEAHLIAN;
+   bila kosong, memakai bidang).
+4. **Kelengkapan** — menu baru `/admin/kelengkapan` (tabel `kelengkapan`
+   + `ekstrakurikuler`): per siswa per semester diisi kehadiran
+   (sakit/izin/alpa), kepribadian (kelakuan/kerapian/kerajinan), akhlak
+   mulia, catatan wali kelas, status akhir/kenaikan, dan kegiatan
+   ekstrakurikuler. Semua tampil di Cetak Buku Induk.
+5. **Leger CSV** — tombol "Unduh Leger (CSV)" di halaman Input Nilai:
+   rekap siswa × mapel + rata-rata per kelas per semester.
+6. **Rapor Semester** — cetakan satu semester per siswa
+   (`/admin/siswa/{id}/rapor?semester=N`): nilai + kehadiran + ekskul +
+   catatan wali kelas; tombol di Detail Siswa.
+7. **Cetak Buku Induk** — ekstrakurikuler dipisah ke halaman sendiri
+   (page-break sebelum tabelnya; total 4 page-break), tabel
+   kepribadian/akhlak/kehadiran/status/catatan terisi dari kelengkapan.
+8. **Tahun ajaran per tingkat DINAMIS** — diambil dari isian nilai
+   tingkat itu (tahun yang paling sering muncul di nilai semester itu;
+   tahun tingkat = semester ganjil), **bukan dari ledger**: ledger data
+   lama menyimpan tahun kohort/lulus untuk semua semester, dan satu
+   semester bisa punya 2 baris ledger dari tahun sumber berbeda. Bila
+   tingkat belum ada nilainya, tahun dibiarkan kosong. Baris ledger yang
+   dipakai per semester dipilih yang tahunnya cocok dengan tahun nilai
+   semester itu.

@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS `jurusan` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `kode` varchar(10) NOT NULL UNIQUE,
   `nama` varchar(100) NOT NULL,
+  `program_studi` varchar(100) DEFAULT NULL,
   `deskripsi` text DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -244,6 +245,10 @@ CREATE TABLE IF NOT EXISTS `data_sekolah` (
   `website` varchar(100) DEFAULT NULL,
   `kepala_sekolah` varchar(150) DEFAULT NULL,
   `logo` varchar(255) DEFAULT NULL,
+  `bidang_studi_keahlian` varchar(100) NOT NULL DEFAULT 'Teknologi dan Rekayasa',
+  `tempat_ttd` varchar(100) DEFAULT NULL,
+  `tanggal_rapor` date DEFAULT NULL,
+  `input_nilai_dibuka` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -343,6 +348,41 @@ CREATE TABLE IF NOT EXISTS `nilai` (
   CONSTRAINT `nilai_siswa_id_foreign` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE,
   CONSTRAINT `nilai_mapel_id_foreign` FOREIGN KEY (`mapel_id`) REFERENCES `mapel` (`id`) ON DELETE CASCADE,
   CONSTRAINT `nilai_tahun_ajaran_id_foreign` FOREIGN KEY (`tahun_ajaran_id`) REFERENCES `tahun_ajaran` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `kelengkapan` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `siswa_id` bigint UNSIGNED NOT NULL,
+  `tahun_ajaran_id` bigint UNSIGNED NOT NULL,
+  `semester` tinyint UNSIGNED NOT NULL,
+  `sakit` smallint UNSIGNED NOT NULL DEFAULT 0,
+  `izin` smallint UNSIGNED NOT NULL DEFAULT 0,
+  `alpa` smallint UNSIGNED NOT NULL DEFAULT 0,
+  `kelakuan` varchar(20) DEFAULT NULL,
+  `kerapian` varchar(20) DEFAULT NULL,
+  `kerajinan` varchar(20) DEFAULT NULL,
+  `akhlak` varchar(20) DEFAULT NULL,
+  `catatan` text DEFAULT NULL,
+  `kenaikan` varchar(100) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  UNIQUE KEY `kelengkapan_unik` (`siswa_id`, `tahun_ajaran_id`, `semester`),
+  CONSTRAINT `kelengkapan_siswa_id_foreign` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `kelengkapan_tahun_ajaran_id_foreign` FOREIGN KEY (`tahun_ajaran_id`) REFERENCES `tahun_ajaran` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `ekstrakurikuler` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `siswa_id` bigint UNSIGNED NOT NULL,
+  `tahun_ajaran_id` bigint UNSIGNED NOT NULL,
+  `semester` tinyint UNSIGNED NOT NULL,
+  `kegiatan` varchar(150) NOT NULL,
+  `nilai` varchar(30) DEFAULT NULL,
+  `keterangan` varchar(150) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  CONSTRAINT `ekstrakurikuler_siswa_id_foreign` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `ekstrakurikuler_tahun_ajaran_id_foreign` FOREIGN KEY (`tahun_ajaran_id`) REFERENCES `tahun_ajaran` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `migrations` (

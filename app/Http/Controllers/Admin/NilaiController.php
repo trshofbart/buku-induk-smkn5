@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\DataSekolah;
 use App\Models\Kelas;
 use App\Models\Ledger;
 use App\Models\Mapel;
@@ -14,6 +15,27 @@ use Illuminate\Http\UploadedFile;
 
 class NilaiController extends Controller
 {
+    /** Kunci buka/tutup input nilai ala e-Rapor (diatur Admin di Data Sekolah). */
+    private function abortJikaInputDitutup(): void
+    {
+        abort_unless(
+            DataSekolah::get()->input_nilai_dibuka,
+            403,
+            'Input nilai sedang ditutup oleh Admin. Buka kembali di menu Data Sekolah.'
+        );
+    }
+
+    /** Alihkan kunci input nilai (Admin TU) dari halaman Input Nilai. */
+    public function toggleInput()
+    {
+        abort_unless(auth()->user()?->canEdit(), 403, 'Hanya Admin TU yang boleh mengubah kunci input nilai.');
+        $sekolah = DataSekolah::get();
+        $sekolah->update(['input_nilai_dibuka' => ! $sekolah->input_nilai_dibuka]);
+
+        return back()->with('status', $sekolah->input_nilai_dibuka
+            ? 'Input nilai DIBUKA. Admin bisa menyimpan dan mengimport nilai.'
+            : 'Input nilai DITUTUP. Admin tidak bisa menyimpan atau mengimport nilai sampai dibuka kembali.');
+    }
     /** Menu Input Nilai: pilih Tahun Ajaran → Semester → Kelas → Mapel, lalu isi nilai per siswa. */
     public function index(Request $request)
     {
@@ -60,6 +82,7 @@ class NilaiController extends Controller
             'daftarMapel' => $daftarMapel,
             'siswa' => $siswa,
             'nilai' => $nilai,
+            'inputDibuka' => DataSekolah::get()->input_nilai_dibuka,
         ]);
     }
 
@@ -67,6 +90,7 @@ class NilaiController extends Controller
     public function store(Request $request)
     {
         abort_unless(auth()->user()?->canEdit(), 403, 'Hanya Admin TU yang boleh menginput nilai.');
+        $this->abortJikaInputDitutup();
 
         $data = $request->validate([
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
@@ -148,6 +172,7 @@ class NilaiController extends Controller
     public function import(Request $request)
     {
         abort_unless(auth()->user()?->canEdit(), 403, 'Hanya Admin TU yang boleh mengimport nilai.');
+        $this->abortJikaInputDitutup();
 
         $data = $request->validate([
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
@@ -302,6 +327,51 @@ class NilaiController extends Controller
             'semester' => $semester,
             'tahun_ajaran_id' => $tahunId,
             'rata_rata' => round($rata, 2),
+        ]);
+    }
+
+    /** Leger (rekap nilai) per kelas per semester ala e-Rapor — unduh CSV: siswa × mapel + rata-rata. */
+    public function leger(Request $request)
+    {
+        $data = $request->validate([
+            'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
+            'semester' => 'required|integer|min:1|max:8',
+            'kelas_id' => 'required|exists:kelas,id',
+        ]);
+        $kelas = Kelas::with('jurusan')->findOrFail($data['kelas_id']);
+        $tingkat = $data['semester'] <= 2 ? 'X' : ($data['semester'] <= 4 ? 'XI' : 'XII');
+        $mapel = Mapel::untukJurusanTingkat($kelas->jurusan_id, $tingkat);
+        $siswa = Siswa::where('kelas_id', $kelas->id)->orderBy('nama')->get();
+        $nilai = Nilai::where('tahun_ajaran_id', $data['tahun_ajaran_id'])
+            ->where('semester', $data['semester'])
+            ->whereIn('siswa_id', $siswa->pluck('id'))
+            ->whereIn('mapel_id', $mapel->pluck('id'))
+            ->get()->groupBy('siswa_id');
+        $rata = Ledger::where('tahun_ajaran_id', $data['tahun_ajaran_id'])
+            ->where('semester', $data['semester'])
+            ->whereIn('siswa_id', $siswa->pluck('id'))
+            ->get()->keyBy('siswa_id');
+
+        $namaFile = 'leger-'.str_replace(' ', '-', $kelas->nama).'-semester-'.$data['semester'].'.csv';
+        $stream = fopen('php://temp', 'r+');
+        fputs($stream, "\xEF\xBB\xBF");
+        fputcsv($stream, array_merge(['NO', 'NIS', 'NISN', 'NAMA'], $mapel->pluck('nama')->all(), ['RATA-RATA']), ';');
+        foreach ($siswa as $i => $s) {
+            $row = [$i + 1, $s->nis, $s->nisn, $s->nama];
+            foreach ($mapel as $m) {
+                $n = ($nilai->get($s->id) ?? collect())->firstWhere('mapel_id', $m->id);
+                $row[] = $n ? rtrim(rtrim((string) $n->nilai_angka, '0'), '.') : '';
+            }
+            $row[] = $rata->get($s->id)?->rata_rata ?? '';
+            fputcsv($stream, $row, ';');
+        }
+        rewind($stream);
+        $csv = stream_get_contents($stream);
+        fclose($stream);
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="'.$namaFile.'"',
         ]);
     }
 
