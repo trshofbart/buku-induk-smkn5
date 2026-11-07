@@ -38,8 +38,8 @@ Sistem ini menggantikan pola itu dengan satu database: jurusan, kelas, dan tahun
 ┌──────────────┐   ┌──────────────────────────────────────────────┐
 │  ADMIN (TU)  │   │            LARAVEL 12 (Blade)                │
 │  KEPSEK      │──▶│  Route publik  │  Route /admin (auth + role) │
-│  GURU        │   │  Profil, Berita│  Siswa, Buku Induk, Ledger, │
-│  (login)     │   │  Pengumuman    │  Transkrip, Berita, Profil  │
+│  GURU        │   │  Profil, Berita│  Siswa, Buku Induk, Input   │
+│  (login)     │   │  Pengumuman    │  Nilai, Berita, Profil      │
 └──────────────┘   └──────────────┬───────────────────────────────┘
                                   │ Eloquent ORM
                                   ▼
@@ -51,8 +51,10 @@ Sistem ini menggantikan pola itu dengan satu database: jurusan, kelas, dan tahun
 
 Alur pegawai (harian):
   Login → Dashboard → pilih Tahun Ajaran → pilih Jurusan/Kelas
-        → Master Siswa → Data Nominatif → Ledger per Semester
-        → Transkrip → Cetak PDF / Export CSV
+        → Master Siswa → Data Nominatif → Input Nilai → Cetak / Export CSV
+  (Menu Ledger Semester dan Transkrip dihapus 2026-11-07 — datanya tetap
+  tersimpan; rata-rata ledger dihitung otomatis dari nilai, dan cetak
+  buku induk sudah memuat laporan nilai.)
 
 Alur admin berita:
   Login (Admin TU) → Berita → Tambah → isi judul/isi/foto
@@ -100,8 +102,7 @@ Navigasi desktop: sidebar kiri. Navigasi HP: menu bawah (Dashboard, Siswa, Buku 
 | Export Siswa | `/admin/siswa/export` | Download CSV (filter yang sedang aktif ikut terbawa) |
 | **Buku Induk** | `/admin/buku-induk` | Pilih Tahun Ajaran → pilih Jurusan/Kelas → daftar induk |
 | Data Nominatif | `/admin/buku-induk/nominatif?tahun_ajaran_id=&kelas_id=` | Nominatif per kelas (XII / XIII / X / XI), cetak & export |
-| Ledger | `/admin/buku-induk/ledger` | Ledger per siswa per Semester 1–8 |
-| Transkrip | `/admin/buku-induk/transkrip` | Database transkrip, cetak per siswa |
+| Input Nilai | `/admin/nilai` | Pilih Tahun Ajaran → Tingkat → Semester → Kelas → Mapel; isi manual per siswa, atau import CSV/Excel (template tersedia di halaman yang sama) |
 | Data Sekolah | `/admin/data-sekolah` | Satu baris identitas sekolah (dipakai di kop cetakan) |
 | Berita | `/admin/berita` | CRUD berita + kategori, draft/publish, foto |
 | Profil Sekolah | `/admin/profil` | CRUD halaman profil (sejarah, visi-misi, dst.) |
@@ -410,3 +411,35 @@ Lihat `README.md`. Intinya (5 menit, Windows + Laragon/XAMPP):
 - `composer.json`, `.env.example`, `artisan`, `bootstrap/`, `config/`, `public/`, `routes/`, `app/`, `database/`, `resources/` — starter Laravel 12
 - `public/contoh-import-siswa.csv` — contoh format import
 - `public/manifest.json`, `public/sw.js`, `public/icons/` — PWA
+
+## 12. Perubahan 2026-11-07 (permintaan Bart)
+
+1. **Menu Ledger Semester dihapus** — sidebar, route, controller, dan view
+   dihapus. Tabel `ledger` tetap ada: rata-rata per semester tetap dihitung
+   otomatis dari nilai yang diinput/diimport, dan tetap tampil di cetakan.
+2. **Menu Transkrip dihapus** — pencetakan sudah lewat menu Buku Induk
+   (Detail Siswa → Cetak, memuat laporan nilai lengkap). Tabel `transkrip`
+   tetap ada; halaman Transkrip Nilai per siswa (`/admin/siswa/{id}/transkrip-nilai`)
+   tetap tersedia dari tombol di Detail Siswa.
+3. **Input Nilai: import CSV/Excel + pilihan lengkap.** Form filter kini
+   Tahun Ajaran → Tingkat (X/XI/XII) → Semester (dibatasi tingkat itu) →
+   Kelas/Rombel → Mapel. Di bawahnya ada kartu import: unduh **Template CSV**
+   (kolom NO, NIS, NISN, NAMA + satu kolom per mapel, siswa kelas itu sudah
+   terisi) lalu upload file `.csv` atau `.xlsx`/`.xls`. Kolom file mengikuti
+   contoh file MASTER (header dicari di 8 baris pertama, jadi sheet SMSTR
+   dengan header di baris ke-4 bisa langsung diupload; nilai yang dibaca =
+   kolom pertama tiap blok mapel = nilai Pengetahuan). NIS yang bukan siswa
+   kelas itu dan nilai di luar 0–100 dilaporkan per baris; rata-rata ledger
+   dihitung ulang per siswa yang berubah. Hanya Admin TU yang boleh import
+   (butuh `phpoffice/phpspreadsheet` untuk .xlsx — sudah ditambahkan ke
+   `composer.json`).
+4. **Mapel cetak per jurusan.** Aturan baru (`Mapel::untukJurusanTingkat`):
+   per kelompok, bila jurusan punya mapel sendiri di kelompok itu, mapel itu
+   MENGGANTIKAN mapel umum di kelompok tersebut; bila belum punya, dipakai
+   mapel umum. Daftar awal 20 mapel tetap umum (sesuai sheet MAPEL file
+   MASTER TEI & RPL A yang isinya sama). Untuk jurusan lain (TPM, TITL, dst.)
+   belum ada file MASTER di referensi — daftar C2/C3-nya harus dimasukkan
+   lewat menu Mata Pelajaran (isi Jurusan + Tingkat saat menambah mapel).
+5. **Cetak Buku Induk: transkrip nilai beda halaman tiap tahun ajaran.**
+   Tabel Tingkat X, XI, dan XII masing-masing dimulai di halaman baru
+   (page-break sebelum XI dan XII; X mengikuti halaman Laporan Penilaian).

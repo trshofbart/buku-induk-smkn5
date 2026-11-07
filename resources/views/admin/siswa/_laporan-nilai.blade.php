@@ -25,11 +25,13 @@
     <tr><td class="lbl">KOMPETENSI KEAHLIAN</td><td class="titik">:</td><td>{{ strtoupper($siswa->jurusan?->nama ?? '') }}</td></tr>
 </table>
 
-@foreach (['X', 'XI', 'XII'] as $tingkat)
+@foreach (['X', 'XI', 'XII'] as $i => $tingkat)
     @php
         $d = $laporan[$tingkat];
         $smtNo = ['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]][$tingkat];
     @endphp
+    {{-- Tiap tahun ajaran di halaman cetak sendiri. --}}
+    @if ($i > 0)<div class="halaman-baru"></div>@endif
     <p class="subjudul">TAHUN DIKLAT : {{ $d['tahun'] ?? '&ndash;' }} &nbsp;&nbsp; TINGKAT : {{ $tingkat }}</p>
     <table class="nilai">
         <thead>

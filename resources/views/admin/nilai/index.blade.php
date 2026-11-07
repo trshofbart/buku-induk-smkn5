@@ -8,8 +8,11 @@
     <select name="tahun_ajaran_id" class="border rounded-lg px-3 py-2">
         @foreach ($tahunAjaran as $t)<option value="{{ $t->id }}" @selected($tahun?->id == $t->id)>{{ $t->nama }}</option>@endforeach
     </select>
+    <select name="tingkat" class="border rounded-lg px-3 py-2">
+        @foreach (['X', 'XI', 'XII'] as $tk)<option value="{{ $tk }}" @selected($tingkat == $tk)>Tingkat {{ $tk }}</option>@endforeach
+    </select>
     <select name="semester" class="border rounded-lg px-3 py-2">
-        @for ($i = 1; $i <= 8; $i++)<option value="{{ $i }}" @selected($semester == $i)>Semester {{ $i }} (Tingkat {{ $i <= 2 ? 'X' : ($i <= 4 ? 'XI' : 'XII') }})</option>@endfor
+        @foreach (['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]][$tingkat] as $i)<option value="{{ $i }}" @selected($semester == $i)>Semester {{ $i }}</option>@endforeach
     </select>
     <select name="kelas_id" class="border rounded-lg px-3 py-2">
         <option value="">— Pilih Kelas —</option>
@@ -21,6 +24,34 @@
     </select>
     <button class="bg-green-700 text-white px-4 py-2 rounded-lg">Tampilkan</button>
 </form>
+
+@if ($errors->any())<div class="bg-red-100 text-red-800 px-4 py-3 rounded-lg mb-4">{{ $errors->first() }}</div>@endif
+@if (session('import_galat'))
+    <div class="bg-amber-100 text-amber-900 px-4 py-3 rounded-lg mb-4 text-sm">
+        <p class="font-bold">Sebagian baris tidak bisa diimport:</p>
+        <ul class="list-disc pl-5 mt-1">@foreach (session('import_galat') as $g)<li>{{ $g }}</li>@endforeach</ul>
+    </div>
+@endif
+
+@if ($kelas && $tahun)
+    <div class="bg-white rounded-xl shadow p-5 mb-4">
+        <h2 class="font-bold">Import Nilai dari File (CSV / Excel)</h2>
+        <p class="text-sm text-slate-500 mt-1">Kolom file mengikuti contoh file MASTER: <strong>NO, NIS, NISN, NAMA</strong>, lalu satu kolom per mata pelajaran berisi nilai angka (Pengetahuan). Unduh template di bawah — daftar siswa kelas ini sudah terisi, tinggal isi nilai per mapel. File Excel (.xlsx) maupun CSV bisa dipakai.</p>
+        <div class="flex flex-wrap items-center gap-3 mt-3">
+            <a href="{{ route('admin.nilai.template', ['tahun_ajaran_id' => $tahun->id, 'semester' => $semester, 'kelas_id' => $kelas->id]) }}" class="bg-white border border-green-700 text-green-700 px-4 py-2 rounded-lg text-sm">Unduh Template CSV</a>
+            @if (auth()->user()->canEdit())
+                <form method="POST" action="{{ route('admin.nilai.import') }}" enctype="multipart/form-data" class="flex flex-wrap items-center gap-2">
+                    @csrf
+                    <input type="hidden" name="tahun_ajaran_id" value="{{ $tahun->id }}">
+                    <input type="hidden" name="semester" value="{{ $semester }}">
+                    <input type="hidden" name="kelas_id" value="{{ $kelas->id }}">
+                    <input type="file" name="file" required accept=".csv,.xlsx,.xls,.txt" class="border rounded-lg px-3 py-2 text-sm">
+                    <button class="bg-green-700 text-white px-4 py-2 rounded-lg text-sm">Import Nilai</button>
+                </form>
+            @endif
+        </div>
+    </div>
+@endif
 
 @if ($kelas && $mapel)
     <div class="bg-white rounded-xl shadow p-5 mb-4 text-sm">

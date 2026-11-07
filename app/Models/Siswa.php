@@ -82,7 +82,7 @@ class Siswa extends Model
                 }
             }
             $kelompok = [];
-            foreach (Mapel::untukJurusan($this->jurusan_id)->untukTingkat($tingkat)->terurut()->get() as $m) {
+            foreach (Mapel::untukJurusanTingkat($this->jurusan_id, $tingkat) as $m) {
                 $kelompok[$m->kelompok][] = [
                     'mapel' => $m,
                     'smt1' => $nilaiByMapelSemester->get($m->id.'-'.$smts[0])?->first(),

@@ -57,14 +57,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/buku-induk', [BukuIndukController::class, 'index'])->name('buku-induk.index');
     Route::get('/buku-induk/kelas/{kelas}', [BukuIndukController::class, 'perKelas'])->name('buku-induk.per-kelas');
     Route::get('/buku-induk/nominatif', [BukuIndukController::class, 'nominatif'])->name('buku-induk.nominatif');
-    Route::get('/buku-induk/ledger', [BukuIndukController::class, 'ledger'])->name('buku-induk.ledger');
-    Route::post('/buku-induk/ledger', [BukuIndukController::class, 'ledgerStore'])->name('buku-induk.ledger.store')->middleware('role:admin_tu');
-    Route::get('/buku-induk/transkrip', [BukuIndukController::class, 'transkrip'])->name('buku-induk.transkrip');
-    Route::post('/buku-induk/transkrip', [BukuIndukController::class, 'transkripStore'])->name('buku-induk.transkrip.store')->middleware('role:admin_tu');
 
     // --- Input Nilai per mapel / semester / tahun ajaran ---
     Route::get('/nilai', [NilaiController::class, 'index'])->name('nilai.index')->middleware('role:admin_tu,kepala_sekolah,guru');
     Route::post('/nilai', [NilaiController::class, 'store'])->name('nilai.store')->middleware('role:admin_tu');
+    Route::get('/nilai/template', [NilaiController::class, 'template'])->name('nilai.template')->middleware('role:admin_tu,kepala_sekolah,guru');
+    Route::post('/nilai/import', [NilaiController::class, 'import'])->name('nilai.import')->middleware('role:admin_tu');
 
     // --- Berita / Profil / Pengumuman (kelola konten publik) ---
     Route::resource('berita', BeritaAdminController::class)->except(['show'])->middleware('role:admin_tu');

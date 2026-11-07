@@ -23,7 +23,7 @@
     <input type="number" step="0.01" min="0" max="100" name="kkm_default" placeholder="KKM (76)" class="border rounded-lg px-3 py-2 w-28">
     <button class="bg-green-700 text-white px-4 py-2 rounded-lg">+ Tambah</button>
 </form>
-<p class="text-sm text-slate-500 mb-4">Daftar awal 20 mapel diambil dari sheet MAPEL file MASTER. Mapel tanpa jurusan berlaku untuk semua jurusan; tanpa tingkat berlaku untuk X, XI, dan XII.</p>
+<p class="text-sm text-slate-500 mb-4">Daftar awal 20 mapel diambil dari sheet MAPEL file MASTER (TEI &amp; RPL A). Mapel tanpa jurusan berlaku untuk semua jurusan; tanpa tingkat berlaku untuk X, XI, dan XII. Bila sebuah jurusan punya mapel sendiri di suatu kelompok (mis. C3-nya sendiri), mapel itu <strong>menggantikan</strong> mapel umum di kelompok tersebut pada lembar cetak — jadi tambahkan seluruh daftar mapel kelompok itu untuk jurusan tersebut.</p>
 
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">

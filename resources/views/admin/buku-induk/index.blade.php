@@ -22,8 +22,7 @@
         <h2 class="font-bold">Jalan Pintas</h2>
         <div class="flex flex-col gap-2 mt-3 text-sm">
             <a href="{{ route('admin.buku-induk.nominatif') }}" class="text-green-700 font-semibold">Data Nominatif &rarr;</a>
-            <a href="{{ route('admin.buku-induk.ledger') }}" class="text-green-700 font-semibold">Ledger Semester 1–8 &rarr;</a>
-            <a href="{{ route('admin.buku-induk.transkrip') }}" class="text-green-700 font-semibold">Database Transkrip &rarr;</a>
+            <a href="{{ route('admin.nilai.index') }}" class="text-green-700 font-semibold">Input Nilai &rarr;</a>
             <a href="{{ route('admin.siswa.export') }}" class="text-green-700 font-semibold">Export CSV Data Siswa &rarr;</a>
         </div>
     </div>
