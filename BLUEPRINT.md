@@ -443,3 +443,17 @@ Lihat `README.md`. Intinya (5 menit, Windows + Laragon/XAMPP):
 5. **Cetak Buku Induk: transkrip nilai beda halaman tiap tahun ajaran.**
    Tabel Tingkat X, XI, dan XII masing-masing dimulai di halaman baru
    (page-break sebelum XI dan XII; X mengikuti halaman Laporan Penilaian).
+
+## 13. Mapel C2/C3 per jurusan (2026-11-07)
+
+Menu baru **Mapel per Jurusan** (Master & Pengguna, Admin TU):
+`/admin/master/mapel-per-jurusan`. Pilih jurusan → tampil daftar C2/C3
+yang akan tercetak untuk jurusan itu, per tingkat (X/XI/XII), dengan tanda
+**Umum** (dipakai semua jurusan) atau **Khusus <kode>** (hanya jurusan ini,
+menggantikan mapel umum di kelompok yang sama). Bila jurusan masih memakai
+daftar umum, ada tombol **Salin Daftar Umum** — menyalin C2/C3 umum menjadi
+daftar khusus jurusan itu, lalu namanya bisa diubah/dihapus sesuai daftar
+jurusan. Tambah mapel langsung dari halaman ini (nama, kelompok C2/C3,
+tingkat, urutan, KKM); hapus hanya untuk mapel khusus (mapel umum dihapus
+dari menu Mata Pelajaran, karena berpengaruh ke semua jurusan). Cetakan
+memakai aturan `Mapel::untukJurusanTingkat` (lihat §12 poin 4).

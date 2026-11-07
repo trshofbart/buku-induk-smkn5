@@ -141,6 +141,50 @@ class MasterController extends Controller
         return back()->with('status', 'Mata pelajaran berhasil dihapus.');
     }
 
+    /** Daftar C2/C3 yang akan tercetak untuk satu jurusan (Admin TU). */
+    public function mapelPerJurusan(Request $request)
+    {
+        $jurusan = $request->filled('jurusan_id')
+            ? Jurusan::findOrFail($request->jurusan_id)
+            : Jurusan::orderBy('nama')->firstOrFail();
+
+        // Daftar efektif per tingkat: mapel khusus jurusan menggantikan
+        // mapel umum di kelompok yang sama (aturan Mapel::untukJurusanTingkat).
+        $daftar = [];
+        foreach (['X', 'XI', 'XII'] as $tingkat) {
+            $daftar[$tingkat] = Mapel::untukJurusanTingkat($jurusan->id, $tingkat)
+                ->whereIn('kelompok', ['C2', 'C3'])
+                ->groupBy('kelompok');
+        }
+        $punyaKhusus = Mapel::where('jurusan_id', $jurusan->id)
+            ->whereIn('kelompok', ['C2', 'C3'])->exists();
+
+        return view('admin.master.mapel-per-jurusan', [
+            'jurusan' => $jurusan,
+            'daftarJurusan' => Jurusan::orderBy('nama')->get(),
+            'daftar' => $daftar,
+            'punyaKhusus' => $punyaKhusus,
+        ]);
+    }
+
+    /** Salin daftar C2/C3 umum menjadi daftar khusus jurusan ini (untuk diedit). */
+    public function mapelSalinUmum(Request $request)
+    {
+        $data = $request->validate(['jurusan_id' => 'required|exists:jurusan,id']);
+        $disalin = 0;
+        foreach (Mapel::whereNull('jurusan_id')->whereIn('kelompok', ['C2', 'C3'])->get() as $m) {
+            $baru = Mapel::firstOrCreate(
+                ['nama' => $m->nama, 'jurusan_id' => $data['jurusan_id'], 'tingkat' => $m->tingkat],
+                ['kelompok' => $m->kelompok, 'urutan' => $m->urutan, 'kkm_default' => $m->kkm_default]
+            );
+            if ($baru->wasRecentlyCreated) {
+                $disalin++;
+            }
+        }
+
+        return back()->with('status', "$disalin mapel C2/C3 umum disalin ke jurusan ini. Silakan ubah nama atau hapus sesuai daftar jurusan.");
+    }
+
     // ---------- Data Sekolah ----------
     public function dataSekolahEdit()
     {

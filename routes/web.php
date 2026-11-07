@@ -89,6 +89,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/mapel', [MasterController::class, 'mapelIndex'])->name('mapel.index');
         Route::post('/mapel', [MasterController::class, 'mapelStore'])->name('mapel.store');
         Route::delete('/mapel/{mapel}', [MasterController::class, 'mapelDestroy'])->name('mapel.destroy');
+        Route::get('/mapel-per-jurusan', [MasterController::class, 'mapelPerJurusan'])->name('mapel.perjurusan');
+        Route::post('/mapel-per-jurusan/salin', [MasterController::class, 'mapelSalinUmum'])->name('mapel.salin');
 
         Route::get('/data-sekolah', [MasterController::class, 'dataSekolahEdit'])->name('data-sekolah.edit');
         Route::put('/data-sekolah', [MasterController::class, 'dataSekolahUpdate'])->name('data-sekolah.update');

@@ -34,6 +34,7 @@
                 <a href="{{ route('admin.jurusan.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Jurusan</a>
                 <a href="{{ route('admin.kelas.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Kelas</a>
                 <a href="{{ route('admin.mapel.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Mata Pelajaran</a>
+                <a href="{{ route('admin.mapel.perjurusan') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Mapel per Jurusan</a>
                 <a href="{{ route('admin.data-sekolah.edit') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Data Sekolah</a>
                 <a href="{{ route('admin.pengguna.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Pengguna</a>
                 <a href="{{ route('admin.log.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Log Aktivitas</a>
