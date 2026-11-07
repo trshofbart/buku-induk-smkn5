@@ -22,7 +22,7 @@
         <div class="flex flex-wrap gap-2 mt-4">
             <a href="{{ route('admin.siswa.index') }}" class="bg-green-700 text-white text-sm px-3 py-2 rounded-lg">Data Siswa</a>
             <a href="{{ route('admin.buku-induk.index') }}" class="bg-green-700 text-white text-sm px-3 py-2 rounded-lg">Buku Induk</a>
-            <a href="{{ route('admin.siswa.export') }}" class="border border-green-700 text-green-700 text-sm px-3 py-2 rounded-lg">Export CSV</a>
+            <a href="{{ route('admin.siswa.export') }}" class="border border-green-700 text-green-700 text-sm px-3 py-2 rounded-lg">Export Excel</a>
         </div>
     </div>
     <div class="bg-white rounded-xl shadow p-5">
