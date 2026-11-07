@@ -32,7 +32,7 @@
     @endphp
     {{-- Tiap tahun ajaran di halaman cetak sendiri. --}}
     @if ($i > 0)<div class="halaman-baru"></div>@endif
-    <p class="subjudul">TAHUN DIKLAT : {{ $d['tahun'] ?? '&ndash;' }} &nbsp;&nbsp; TINGKAT : {{ $tingkat }}</p>
+    <p class="subjudul">TAHUN AJARAN : {{ $d['tahun'] ?? '&ndash;' }} &nbsp;&nbsp; TINGKAT : {{ $tingkat }}</p>
     <table class="nilai">
         <thead>
             <tr>

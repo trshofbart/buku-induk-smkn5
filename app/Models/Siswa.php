@@ -63,8 +63,8 @@ class Siswa extends Model
 
         $out = [];
         foreach (['X' => [1, 2], 'XI' => [3, 4], 'XII' => [5, 6]] as $tingkat => $smts) {
-            // Tahun diklat: dari tahun ajaran semester itu di data nilai
-            // (lebih tepat), baru fallback ke ledger.
+            // Tahun ajaran: dari tahun ajaran semester itu di data nilai
+            // (sesuai yang dipilih saat input nilai), baru fallback ke ledger.
             $tahun = null;
             foreach ($smts as $s) {
                 $n = $this->nilai->firstWhere('semester', $s);
