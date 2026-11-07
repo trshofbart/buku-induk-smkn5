@@ -10,6 +10,7 @@ use App\Models\Mapel;
 use App\Models\Nilai;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use App\Support\ExcelExport;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 
@@ -138,7 +139,7 @@ class NilaiController extends Controller
         );
     }
 
-    /** Unduh template import nilai (CSV) mengikuti kolom file MASTER: NO, NIS, NISN, NAMA, lalu satu kolom per mapel (nilai Pengetahuan). */
+    /** Unduh template import nilai (Excel) mengikuti kolom file MASTER: NO, NIS, NISN, NAMA, lalu satu kolom per mapel (nilai Pengetahuan). */
     public function template(Request $request)
     {
         $data = $request->validate([
@@ -151,21 +152,16 @@ class NilaiController extends Controller
         $mapel = Mapel::untukJurusanTingkat($kelas->jurusan_id, $tingkat);
         $siswa = Siswa::where('kelas_id', $kelas->id)->orderBy('nama')->get();
 
-        $namaFile = 'template-nilai-'.str_replace(' ', '-', $kelas->nama).'-semester-'.$data['semester'].'.csv';
-        $stream = fopen('php://temp', 'r+');
-        fputs($stream, "\xEF\xBB\xBF"); // BOM supaya Excel membaca UTF-8
-        fputcsv($stream, array_merge(['NO', 'NIS', 'NISN', 'NAMA'], $mapel->pluck('nama')->all()), ';');
+        $rows = [];
         foreach ($siswa as $i => $s) {
-            fputcsv($stream, array_merge([$i + 1, $s->nis, $s->nisn, $s->nama], array_fill(0, $mapel->count(), '')), ';');
+            $rows[] = array_merge([$i + 1, $s->nis, $s->nisn, $s->nama], array_fill(0, $mapel->count(), ''));
         }
-        rewind($stream);
-        $csv = stream_get_contents($stream);
-        fclose($stream);
 
-        return response($csv, 200, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="'.$namaFile.'"',
-        ]);
+        return ExcelExport::unduh(
+            array_merge(['NO', 'NIS', 'NISN', 'NAMA'], $mapel->pluck('nama')->all()),
+            $rows,
+            'template-nilai-'.str_replace(' ', '-', $kelas->nama).'-semester-'.$data['semester'].'.xlsx'
+        );
     }
 
     /** Import nilai dari file CSV/Excel mengikuti kolom file MASTER (NO, NIS, NISN, NAMA + satu kolom per mapel). */
@@ -330,7 +326,7 @@ class NilaiController extends Controller
         ]);
     }
 
-    /** Leger (rekap nilai) per kelas per semester ala e-Rapor — unduh CSV: siswa × mapel + rata-rata. */
+    /** Leger (rekap nilai) per kelas per semester ala e-Rapor — unduh Excel: siswa × mapel + rata-rata. */
     public function leger(Request $request)
     {
         $data = $request->validate([
@@ -352,27 +348,22 @@ class NilaiController extends Controller
             ->whereIn('siswa_id', $siswa->pluck('id'))
             ->get()->keyBy('siswa_id');
 
-        $namaFile = 'leger-'.str_replace(' ', '-', $kelas->nama).'-semester-'.$data['semester'].'.csv';
-        $stream = fopen('php://temp', 'r+');
-        fputs($stream, "\xEF\xBB\xBF");
-        fputcsv($stream, array_merge(['NO', 'NIS', 'NISN', 'NAMA'], $mapel->pluck('nama')->all(), ['RATA-RATA']), ';');
+        $rows = [];
         foreach ($siswa as $i => $s) {
             $row = [$i + 1, $s->nis, $s->nisn, $s->nama];
             foreach ($mapel as $m) {
                 $n = ($nilai->get($s->id) ?? collect())->firstWhere('mapel_id', $m->id);
-                $row[] = $n ? rtrim(rtrim((string) $n->nilai_angka, '0'), '.') : '';
+                $row[] = $n ? (float) $n->nilai_angka : null;
             }
-            $row[] = $rata->get($s->id)?->rata_rata ?? '';
-            fputcsv($stream, $row, ';');
+            $row[] = $rata->get($s->id)?->rata_rata !== null ? (float) $rata->get($s->id)->rata_rata : null;
+            $rows[] = $row;
         }
-        rewind($stream);
-        $csv = stream_get_contents($stream);
-        fclose($stream);
 
-        return response($csv, 200, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="'.$namaFile.'"',
-        ]);
+        return ExcelExport::unduh(
+            array_merge(['NO', 'NIS', 'NISN', 'NAMA'], $mapel->pluck('nama')->all(), ['RATA-RATA']),
+            $rows,
+            'leger-'.str_replace(' ', '-', $kelas->nama).'-semester-'.$data['semester'].'.xlsx'
+        );
     }
 
     /** Transkrip nilai per siswa, sesuai LAPORAN PENILAIAN file MASTER (HAL_PRINT). */

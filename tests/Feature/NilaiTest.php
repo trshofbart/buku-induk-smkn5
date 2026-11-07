@@ -83,7 +83,7 @@ class NilaiTest extends TestCase
         $this->actingAs($admin)->get('/admin/buku-induk/transkrip')->assertNotFound();
     }
 
-    public function test_template_csv_sesuai_kolom_file_master(): void
+    public function test_template_excel_sesuai_kolom_file_master(): void
     {
         $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
         $siswa = Siswa::whereNotNull('kelas_id')->firstOrFail();
@@ -94,12 +94,14 @@ class NilaiTest extends TestCase
             'kelas_id' => $siswa->kelas_id,
         ]));
         $res->assertOk();
-        $isi = $res->getContent();
-        $this->assertStringContainsString('NO', $isi);
-        $this->assertStringContainsString('NIS', $isi);
-        $this->assertStringContainsString('NAMA', $isi);
-        $this->assertStringContainsString($siswa->nis, $isi);
-        $this->assertStringContainsString($siswa->nama, $isi);
+        $this->assertStringContainsString('.xlsx', $res->headers->get('Content-Disposition'));
+        $baris = \App\Support\ExcelExport::baca($res->getContent());
+        // Baris header: NO, NIS, NISN, NAMA + satu kolom per mapel.
+        $this->assertSame(['NO', 'NIS', 'NISN', 'NAMA'], array_slice($baris[0], 0, 4));
+        // Baris siswa pertama memuat NIS + nama di kolomnya sendiri.
+        $kolomNis = array_search($siswa->nis, array_column($baris, 1));
+        $this->assertNotFalse($kolomNis);
+        $this->assertSame($siswa->nama, $baris[$kolomNis][3]);
     }
 
     public function test_import_csv_mengikuti_kolom_file_master(): void

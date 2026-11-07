@@ -7,7 +7,7 @@
         <a href="{{ route('admin.siswa.create') }}" class="bg-green-700 text-white text-sm px-3 py-2 rounded-lg">+ Tambah Siswa</a>
         <a href="{{ route('admin.siswa.import') }}" class="bg-white border text-sm px-3 py-2 rounded-lg">Import CSV</a>
     @endif
-    <a href="{{ route('admin.siswa.export', request()->query()) }}" class="bg-white border text-sm px-3 py-2 rounded-lg">Export CSV</a>
+    <a href="{{ route('admin.siswa.export', request()->query()) }}" class="bg-white border text-sm px-3 py-2 rounded-lg">Export Excel</a>
 </div>
 
 <form method="GET" class="bg-white rounded-xl shadow p-4 grid md:grid-cols-6 gap-2 mb-4">

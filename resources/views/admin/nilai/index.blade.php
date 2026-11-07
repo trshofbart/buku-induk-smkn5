@@ -46,8 +46,8 @@
         <h2 class="font-bold">Import Nilai dari File (CSV / Excel)</h2>
         <p class="text-sm text-slate-500 mt-1">Kolom file mengikuti contoh file MASTER: <strong>NO, NIS, NISN, NAMA</strong>, lalu satu kolom per mata pelajaran berisi nilai angka (Pengetahuan). Unduh template di bawah — daftar siswa kelas ini sudah terisi, tinggal isi nilai per mapel. File Excel (.xlsx) maupun CSV bisa dipakai.</p>
         <div class="flex flex-wrap items-center gap-3 mt-3">
-            <a href="{{ route('admin.nilai.template', ['tahun_ajaran_id' => $tahun->id, 'semester' => $semester, 'kelas_id' => $kelas->id]) }}" class="bg-white border border-green-700 text-green-700 px-4 py-2 rounded-lg text-sm">Unduh Template CSV</a>
-            <a href="{{ route('admin.nilai.leger', ['tahun_ajaran_id' => $tahun->id, 'semester' => $semester, 'kelas_id' => $kelas->id]) }}" class="bg-white border border-green-700 text-green-700 px-4 py-2 rounded-lg text-sm">Unduh Leger (CSV)</a>
+            <a href="{{ route('admin.nilai.template', ['tahun_ajaran_id' => $tahun->id, 'semester' => $semester, 'kelas_id' => $kelas->id]) }}" class="bg-white border border-green-700 text-green-700 px-4 py-2 rounded-lg text-sm">Unduh Template Excel</a>
+            <a href="{{ route('admin.nilai.leger', ['tahun_ajaran_id' => $tahun->id, 'semester' => $semester, 'kelas_id' => $kelas->id]) }}" class="bg-white border border-green-700 text-green-700 px-4 py-2 rounded-lg text-sm">Unduh Leger (Excel)</a>
             @if (auth()->user()->canEdit())
                 <form method="POST" action="{{ route('admin.nilai.import') }}" enctype="multipart/form-data" class="flex flex-wrap items-center gap-2">
                     @csrf

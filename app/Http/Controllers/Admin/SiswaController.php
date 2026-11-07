@@ -114,7 +114,7 @@ class SiswaController extends Controller
         return redirect()->route('admin.siswa.index')->with('status', 'Siswa berhasil dihapus.');
     }
 
-    /** Export CSV — filter yang sedang aktif ikut terbawa. */
+    /** Export data siswa (Excel) — filter yang sedang aktif ikut terbawa. */
     public function export(Request $request)
     {
         $rows = Siswa::with(['jurusan', 'kelas', 'tahunAjaran'])
@@ -122,22 +122,15 @@ class SiswaController extends Controller
             ->filter($request->only(['tahun_ajaran_id', 'jurusan_id', 'kelas_id', 'status']))
             ->orderBy('nama')->get();
 
-        $namaFile = 'data-siswa-'.now()->format('Ymd-His').'.csv';
-        $headers = ['Content-Type' => 'text/csv; charset=UTF-8', 'Content-Disposition' => "attachment; filename=\"{$namaFile}\""];
-
-        return response()->stream(function () use ($rows) {
-            $out = fopen('php://output', 'w');
-            fputs($out, "\xEF\xBB\xBF"); // BOM supaya Excel baca UTF-8 dengan benar
-            fputcsv($out, ['NIS', 'NISN', 'Nama', 'JK', 'Tempat Lahir', 'Tanggal Lahir', 'Agama', 'Alamat', 'No HP', 'Tahun Ajaran', 'Jurusan', 'Kelas', 'Status']);
-            foreach ($rows as $s) {
-                fputcsv($out, [
-                    $s->nis, $s->nisn, $s->nama, $s->jenis_kelamin, $s->tempat_lahir,
-                    $s->tanggal_lahir?->format('Y-m-d'), $s->agama, $s->alamat, $s->no_hp,
-                    $s->tahunAjaran?->nama, $s->jurusan?->nama, $s->kelas?->nama, $s->status,
-                ]);
-            }
-            fclose($out);
-        }, 200, $headers);
+        return \App\Support\ExcelExport::unduh(
+            ['NIS', 'NISN', 'Nama', 'JK', 'Tempat Lahir', 'Tanggal Lahir', 'Agama', 'Alamat', 'No HP', 'Tahun Ajaran', 'Jurusan', 'Kelas', 'Status'],
+            $rows->map(fn ($s) => [
+                $s->nis, $s->nisn, $s->nama, $s->jenis_kelamin, $s->tempat_lahir,
+                $s->tanggal_lahir?->format('Y-m-d'), $s->agama, $s->alamat, $s->no_hp,
+                $s->tahunAjaran?->nama, $s->jurusan?->nama, $s->kelas?->nama, $s->status,
+            ])->all(),
+            'data-siswa-'.now()->format('Ymd-His').'.xlsx'
+        );
     }
 
     public function importForm()

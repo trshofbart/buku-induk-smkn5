@@ -159,7 +159,7 @@ class RaporAlurTest extends TestCase
         $this->assertStringNotContainsString('nilai_huruf', $html);
     }
 
-    public function test_leger_csv_memuat_nilai_per_mapel(): void
+    public function test_leger_excel_memuat_nilai_per_mapel(): void
     {
         $admin = $this->admin();
         $siswa = $this->siswaDenganKelas();
@@ -175,11 +175,22 @@ class RaporAlurTest extends TestCase
             'semester' => 1,
             'kelas_id' => $siswa->kelas_id,
         ]))->assertOk();
-        $csv = $res->getContent();
-        $this->assertStringContainsString($mapel->nama, $csv);
-        $this->assertStringContainsString($siswa->nis, $csv);
-        $this->assertStringContainsString('88', $csv);
-        $this->assertStringContainsString('RATA-RATA', $csv);
+        $this->assertStringContainsString('.xlsx', $res->headers->get('Content-Disposition'));
+        $baris = \App\Support\ExcelExport::baca($res->getContent());
+        // Header memuat nama mapel + RATA-RATA; nilai 88 ada di selnya sendiri.
+        $this->assertContains($mapel->nama, $baris[0]);
+        $this->assertContains('RATA-RATA', $baris[0]);
+        $kolomMapel = array_search($mapel->nama, $baris[0]);
+        $barisSiswa = null;
+        foreach (array_slice($baris, 1) as $r) {
+            if (($r[1] ?? null) === $siswa->nis) {
+                $barisSiswa = $r;
+                break;
+            }
+        }
+        $this->assertNotNull($barisSiswa);
+        $this->assertSame($siswa->nama, $barisSiswa[3]);
+        $this->assertEquals(88, $barisSiswa[$kolomMapel]);
     }
 
     public function test_rapor_semester_menampilkan_nilai_dan_kehadiran_semester_itu(): void

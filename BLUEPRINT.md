@@ -496,3 +496,17 @@ Yang berubah:
    tingkat belum ada nilainya, tahun dibiarkan kosong. Baris ledger yang
    dipakai per semester dipilih yang tahunnya cocok dengan tahun nilai
    semester itu.
+
+## 15. Unduhan Excel, bukan CSV (2026-11-07)
+
+Tiga unduhan (Template Nilai, Leger, Export Data Siswa) dulu berupa CSV:
+Excel memecah CSV mengikuti "List separator" regional Windows — di
+Windows Indonesia biasanya `;`, di Windows Inggris `,` — sehingga file
+yang sama bisa terbuka rapi di satu laptop dan menumpuk di satu kolom
+di laptop lain (ketiga file itu bahkan memakai pemisah berbeda: template
+dan leger `;`, export siswa `,`). Sekarang ketiganya diunduh sebagai
+**file Excel asli (.xlsx)** lewat helper bersama
+`app/Support/ExcelExport.php`: tiap nilai di kolomnya sendiri, header
+tebal, lebar kolom mengikuti isi (dibatasi 50 karakter, teks dibungkus),
+baris header dibekukan. Import nilai tetap menerima CSV maupun .xlsx,
+jadi template .xlsx yang diisi di Excel bisa langsung di-upload kembali.
