@@ -50,10 +50,11 @@ Buka **http://buku-induk-smkn5.test**
 
 - Halaman depan: Profil + Berita (publik).
 - Login pegawai: klik **Login Pegawai** di kanan atas.
-  Akun contoh — **segera ganti setelah masuk**:
-  - Admin TU: `admin@smkn5.sch.id` / `password`
-  - Kepala Sekolah: `kepsek@smkn5.sch.id` / `password`
-  - Guru: `guru@smkn5.sch.id` / `password`
+  Akun contoh — passwordnya dari `.env` (`SEED_*_PASSWORD`) atau acak yang
+  ditampilkan sekali saat `db:seed`; **segera ganti setelah masuk**:
+  - Admin TU: `admin@smkn5.sch.id`
+  - Kepala Sekolah: `kepsek@smkn5.sch.id`
+  - Guru: `guru@smkn5.sch.id`
 
 ## Yang sudah diatur di `.env` paket ini
 

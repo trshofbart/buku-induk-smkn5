@@ -13,6 +13,11 @@ class AplikasiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // Seeder tidak lagi hardcode password: di test, isi lewat env
+        // supaya login contoh di bawah tetap memakai 'password'.
+        putenv('SEED_ADMIN_PASSWORD=password');
+        putenv('SEED_KEPSEK_PASSWORD=password');
+        putenv('SEED_GURU_PASSWORD=password');
         $this->seed();
     }
 

@@ -19,11 +19,16 @@ Frontend: Blade + Tailwind CSS via CDN (tanpa build Node). Responsif + PWA.
 
 ## Akun contoh (SEEDER — ganti setelah install!)
 
-| Role | Email | Password |
-|---|---|---|
-| Admin TU | `admin@smkn5.sch.id` | `password` |
-| Kepala Sekolah | `kepsek@smkn5.sch.id` | `password` |
-| Guru | `guru@smkn5.sch.id` | `password` |
+Password akun contoh **tidak lagi hardcode** — isi lewat `.env`
+(`SEED_ADMIN_PASSWORD` / `SEED_KEPSEK_PASSWORD` / `SEED_GURU_PASSWORD`).
+Kalau kosong, seeder membuat password acak 12 karakter dan menampilkannya
+sekali saat `db:seed` berjalan — catat saat itu juga.
+
+| Role | Email |
+|---|---|
+| Admin TU | `admin@smkn5.sch.id` |
+| Kepala Sekolah | `kepsek@smkn5.sch.id` |
+| Guru | `guru@smkn5.sch.id` |
 
 ## Instalasi 5 menit — Windows (Laragon / XAMPP)
 
@@ -179,6 +184,12 @@ Aturan: `nis` wajib & unik; `nisn` unik bila diisi; `tanggal_lahir` format `YYYY
 ## Keamanan — baca sebelum dipakai di produksi
 
 - Ganti semua password akun contoh, dan hapus akun yang tidak dipakai.
+  Aplikasi belum punya menu ganti password untuk akun yang sudah ada, jadi
+  ganti lewat Terminal Laragon (masuk folder proyek dulu), satu baris per akun
+  — ganti `PASSWORD-BARU` dengan password masing-masing, minimal 8 karakter:
+  `php artisan tinker --execute="App\Models\User::where('email','admin@smkn5.sch.id')->update(['password'=>bcrypt('PASSWORD-BARU')]);"`
+  Ulangi untuk `kepsek@smkn5.sch.id` dan `guru@smkn5.sch.id`.
+  Seeder baru di repo tidak mengubah password akun yang sudah terpasang.
 - Set `APP_DEBUG=false` dan `APP_ENV=production` di `.env` produksi.
 - Jangan commit `.env` ke Git. File ini sudah ada di `.gitignore`.
 - Backup database berkala (mysqldump / fitur backup hosting).
