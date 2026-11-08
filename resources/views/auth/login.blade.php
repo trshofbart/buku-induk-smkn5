@@ -25,12 +25,5 @@
         <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="remember" value="1"> Ingat saya</label>
         <button class="w-full bg-green-700 text-white font-semibold py-2.5 rounded-lg">Masuk</button>
     </form>
-
-    <div class="bg-slate-100 rounded-lg p-3 mt-5 text-xs text-slate-500">
-        <p class="font-semibold text-slate-700">Akun contoh (seeder — ganti setelah install):</p>
-        <p>Admin TU: admin@smkn5.sch.id / password</p>
-        <p>Kepala Sekolah: kepsek@smkn5.sch.id / password</p>
-        <p>Guru: guru@smkn5.sch.id / password</p>
-    </div>
 </div>
 @endsection
