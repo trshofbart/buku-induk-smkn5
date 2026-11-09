@@ -419,3 +419,100 @@ Verifikasi: siswa DPIB NIS 18902 — 15/15/12/12/11 nilai smt 1-5,
 tahun X 2018-2019 / XI 2019-2020 / XII 2020-2021, cetak dirender dan
 dikirim ke Telegram (contoh-cetak-buku-induk-DPIB-lulus-2020-2021.html).
 Dump v5: 111.862 nilai.
+
+## Import Nilai Transkrip/Merger kohort 2013-2014 s.d. 2019-2020 (2026-11-09)
+
+Importer: `storage/imports/import_nilai_transkrip.py` (dijalankan di DB
+scratch `/tmp/test-transkrip.sqlite`; DB asli TIDAK disentuh).
+Sumber: file .xls "Data Transkrip Nilai" (Pengetahuan) + "Data Merger"
+di `storage/imports/source/transkrip/` (hasil konversi .xlsx di `xlsx/`).
+
+Manifest (utama -> pelengkap, pertama menang, pelengkap hanya mengisi
+yang kosong; konflik dicatat, nilai lama dipertahankan):
+- 2013-2014: TP1314_BELMOT -> Merger2014_BELMOT
+- 2014-2015: TP1516_BELMOT (termasuk sheet khusus 1 siswa) -> Merger2015
+- 2015-2016: Transkrip2016_Pengetahuan (skala 1-4) -> Merger2016
+  (sheet TKB/TKK/RPL Merger2016 tanpa header -> dilewati)
+- 2016-2017: Transkrip2017 "(MAX 100)" saja (versi 0-100)
+- 2017-2018: Merger2018_BELMOT -> Transkrip2018_Pengetahuan
+- 2018-2019: Transkrip2019_Pengetahuan
+- 2019-2020: DataMerger2020.xlsx -> NilaiIjazah2020_R1 (sheet TOI
+  saja, untuk smt 7-8)
+
+Hasil (scratch): nilai 111.862 -> 506.499 (+394.637 disisip);
+siswa bernilai 1.573 -> 5.699; ledger 20.344 -> 43.743 (+23.399,
+hanya INSERT bila belum ada); mapel 110 -> 695 (+583 khusus jurusan,
++2 umum: Ilmu Pengetahuan Alam & Ilmu Pengetahuan Sosial, kelompok A).
+Duplikat (nilai sama sudah ada): 221.726. Idempotent: jalankan ulang
+= 0 nilai/ledger/mapel baru.
+
+Per kohort (siswa bernilai / total; nilai):
+- 2013-2014: 599/600; 71.762
+- 2014-2015: 566/580; 67.900
+- 2015-2016: 561/561; 50.996
+- 2016-2017: 557/571; 43.702
+- 2017-2018: 588/606; 54.644
+- 2018-2019: 581/607; 53.487
+- 2019-2020: 745/778; 57.539
+Sisa tanpa nilai: 2025-2026 (739, memang belum ada nilai) + ~110
+siswa kohort lama yang tidak ada di file manapun.
+
+Koreksi jurusan (446 siswa, hanya yang tertulis TS di DB):
+2015-2016 TS->TGB 30, TKB 27, TKK 24; 2016-2017 TS->TGB 31, TKB 28,
+TKK 27; 2017-2018 TS->TGB 32, TKB 31, TKK 29; 2018-2019 TS->TGB 32,
+TKB 31, TKK 28; 2019-2020 TS->BKP 30, TS->DPIB 66.
+Catatan: file 2019-2020 sudah punya sheet BKP/DPIB, padahal catatan
+lama menyebut BKP & DPIB pertama lulus 2021-2022 — perlu konfirmasi
+sekolah bila relevan.
+
+Aturan penting yang dipakai importer:
+- Tahun ajaran per siswa dari tahun lulusnya (Y): smt 1-2 Y-2, 3-4 Y-1,
+  5-6 Y, smt 7-8 (TOI) Y+1. Terkonfirmasi cocok dengan nilai TOI
+  2019-2020 yang sudah ada (smt 7-8 tahun 2020-2021). Inkonsistensi
+  lama: TOI 2021-2022 smt 7-8 bertahun 2021-2022 (=Y) — dibiarkan.
+- Tahun ajaran 2011-2012 & 2012-2013 TIDAK ada di seeder (mulai
+  2013-2014) — importer membuatnya (is_active=0); seeder sebaiknya
+  ikut ditambah. Tanpa ini nilai smt 1-4 kohort 2013-2014 hilang.
+- Skala nilai per SEL: (0,4] dianggap 1-4 -> x25 (terbukti sama
+  dengan versi "(MAX 100)" sekolah); 0 dilewati (placeholder).
+  Tidak ada nilai >100 atau <0 yang masuk.
+- IPA/IPS (KTSP) dibuat sebagai mapel UMUM kelompok A; KU/KWU ->
+  "Produk Kreatif dan Kewirausahaan" (C3) untuk semua semester.
+- Ledger = rata-rata Pengetahuan semester itu (file tidak punya
+  Keterampilan/R); hanya INSERT bila belum ada. Jadi rata-rata ledger
+  kohort 2013-2019 berbasis P saja, bukan R.
+- Nama mapel dinormalisasi agresif (alphanumerik saja) + perbaikan
+  typo umum (Diinding, Penegatahuan/Penegetahuan, DasaR, Ssem, dll)
+  supaya varian ejaan yang sama tidak jadi mapel ganda.
+
+Konflik (8.432; nilai lama dipertahankan, tidak ditimpa):
+- 2017-2018 Merger2018 vs Transkrip2018: TEI/TE 3.224 + TKK 1.382
+  (+ TKK 186, TITL 71, TL 71, TEI 60 dari arah Merger). Dua rekaman
+  independen, selisih simetris di sekitar 0 (kebanyakan ±1 s.d. ±9,
+  ekstrem ±31 s.d. ±40); tidak ada yang terbukti benar, Merger
+  menang sebagai utama. TITL/TL identik (8.190 sama, 0 beda).
+- 2013-2014 Merger2014 vs TP1314: hanya 6 konflik.
+- Kolom ganda dalam satu sheet (480, semua 2013-2014): kompetensi
+  yang sama muncul 2x dengan nilai berbeda (mis. "Menggerinda Pahat
+  dan Alat Potong" smt 5 di sheet TM, 70 siswa beda ±5 s.d. ±9);
+  dipakai kolom pertama.
+
+NIS tidak ditemukan (76 baris, 41 unik): 35 siswa RPL 2014-2015
+ada di file tetapi TIDAK ada di DB (blok NIS 15438-15472; butuh
+import siswa dulu bila nilainya mau masuk) + 1 TKK 2014-2015 +
+1 RPL 2017-2018 + 3 siswa di Transkrip2018 (TE/TIK/TL).
+1 siswa TEI 2013-2014 tanpa nilai sama sekali (ada di sheet
+"Nilai Sem Kosong"). 1 siswa kontaminan: 1 siswa kohort 2025-2026
+(TOI) muncul di sheet RPL DataMerger2020 dan ikut bernilai (76 nilai,
+tahun 2023-2024 s.d. 2025-2026) — kemungkinan salah NIS di file.
+
+Gap file: TKK 2013-2014 di TP1314 kolom kompetensinya KOSONG
+(diisi dari Merger2014); tidak ada file Pengetahuan terpisah untuk
+2014-2015 (dipakai TP1516 yang namanya salah + Merger2015).
+
+Catatan penerapan ke DB asli (2026-11-09): 76 nilai kontaminan NIS 18622
+(siswa TOI kohort 2025-2026 yang salah masuk dari sheet RPL DataMerger2020)
+DIHAPUS dari DB asli setelah import — siswa tersebut kini 0 nilai, sesuai
+kenyataan bahwa kohort 2025-2026 belum ada nilainya. Nilai akhir DB asli:
+506.423 nilai, 5.698 siswa bernilai. Tahun 2011-2012 & 2012-2013 juga
+ditambahkan ke TahunAjaranSeeder (supaya instalasi baru konsisten).
