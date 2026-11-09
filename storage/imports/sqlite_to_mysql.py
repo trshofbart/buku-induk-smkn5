@@ -4,7 +4,11 @@
 Pakai: python3 sqlite_to_mysql.py
 Output: ~/workspace/your_files/buku_induk_smkn5_data.sql
 - CREATE TABLE diambil dari schema.sql (sudah sintaks MySQL).
-- INSERT diambil dari SQLite, tabel data saja (tanpa migrations/cache/sessions/jobs).
+- INSERT diambil dari SQLite, tabel data saja (tanpa cache/sessions/jobs).
+- Tabel `migrations` IKUT disertakan (dengan semua barisnya) supaya
+  setelah import, `php artisan migrate` langsung tahu semua migrasi
+  sudah jalan — dulu dump tanpa tabel ini membuat migrate mencoba
+  membuat ulang tabel `users` dan gagal.
 - Tidak mencetak data pribadi ke stdout — hanya hitungan per tabel.
 """
 import re
@@ -18,7 +22,7 @@ SCHEMA_SQL = BASE / "schema.sql"
 OUT = Path.home() / "workspace" / "your_files" / "buku_induk_smkn5_data.sql"
 
 SKIP_TABLES = {
-    "migrations", "cache", "cache_locks", "sessions",
+    "cache", "cache_locks", "sessions",
     "jobs", "job_batches", "failed_jobs", "password_reset_tokens",
     "sqlite_sequence",
 }
