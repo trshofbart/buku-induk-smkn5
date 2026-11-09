@@ -125,7 +125,7 @@ database/
   factories/               SiswaFactory
   seeders/                 DatabaseSeeder + seeder per modul
 public/
-  index.php, manifest.json, sw.js, icons/, contoh-import-siswa.csv
+  index.php, manifest.json, sw.js, icons/
 resources/views/
   layouts/                 app.blade.php (publik), admin.blade.php
   public/                  home, profil, berita, pengumuman
@@ -173,7 +173,7 @@ Setiap file yang diimport dicatat ke tabel `activity_logs`.
 
 ## Format import CSV siswa
 
-Contoh: `public/contoh-import-siswa.csv`. Header wajib:
+Contoh: unduh `template-import-siswa.xlsx` dari halaman Import Siswa. Header wajib:
 
 ```
 nis,nisn,nama,jenis_kelamin,tempat_lahir,tanggal_lahir,agama,alamat,no_hp,tahun_ajaran,jurusan,kelas,status,nama_ayah,nama_ibu,no_hp_ortu

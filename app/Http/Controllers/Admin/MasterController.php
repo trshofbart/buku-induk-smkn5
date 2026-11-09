@@ -240,6 +240,17 @@ class MasterController extends Controller
         return back()->with('status', 'Status akun berhasil diubah.');
     }
 
+    /** Ganti password akun pegawai (Admin TU). Password baru wajib diketik 2x supaya tidak salah ketik. */
+    public function penggunaPassword(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+        $user->update(['password' => Hash::make($data['password'])]);
+        ActivityLog::catat('pengguna.password', "Password akun {$user->email} diganti.");
+        return back()->with('status', "Password akun {$user->name} berhasil diganti.");
+    }
+
     public function penggunaDestroy(User $user)
     {
         if ($user->id === auth()->id()) {

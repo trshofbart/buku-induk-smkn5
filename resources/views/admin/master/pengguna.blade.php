@@ -17,7 +17,13 @@
         <thead><tr class="bg-slate-100 text-left"><th class="px-4 py-3">Nama</th><th class="px-4 py-3">Email</th><th class="px-4 py-3">Role</th><th class="px-4 py-3">Status</th><th class="px-4 py-3">Aksi</th></tr></thead>
         <tbody>
         @foreach ($pengguna as $u)
-            <tr class="border-t"><td class="px-4 py-3 font-semibold">{{ $u->name }}</td><td class="px-4 py-3">{{ $u->email }}</td><td class="px-4 py-3">{{ $u->roleLabel() }}</td><td class="px-4 py-3">{{ $u->is_active ? 'Aktif' : 'Nonaktif' }}</td><td class="px-4 py-3 whitespace-nowrap"><form method="POST" action="{{ route('admin.pengguna.toggle', $u) }}" class="inline">@csrf<button class="text-blue-700">{{ $u->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button></form> | <form method="POST" action="{{ route('admin.pengguna.destroy', $u) }}" class="inline" onsubmit="return confirm('Hapus akun ini?')">@csrf @method('DELETE')<button class="text-red-700">Hapus</button></form></td></tr>
+            <tr class="border-t"><td class="px-4 py-3 font-semibold">{{ $u->name }}</td><td class="px-4 py-3">{{ $u->email }}</td><td class="px-4 py-3">{{ $u->roleLabel() }}</td><td class="px-4 py-3">{{ $u->is_active ? 'Aktif' : 'Nonaktif' }}</td><td class="px-4 py-3 whitespace-nowrap"><form method="POST" action="{{ route('admin.pengguna.toggle', $u) }}" class="inline">@csrf<button class="text-blue-700">{{ $u->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button></form> | <form method="POST" action="{{ route('admin.pengguna.destroy', $u) }}" class="inline" onsubmit="return confirm('Hapus akun ini?')">@csrf @method('DELETE')<button class="text-red-700">Hapus</button></form>
+            <form method="POST" action="{{ route('admin.pengguna.password', $u) }}" class="mt-2 flex gap-1">
+                @csrf
+                <input type="password" name="password" required minlength="8" placeholder="Password baru (min 8)" class="border rounded px-2 py-1 w-36">
+                <input type="password" name="password_confirmation" required minlength="8" placeholder="Ulangi password" class="border rounded px-2 py-1 w-36">
+                <button class="bg-green-700 text-white px-3 py-1 rounded">Ganti Password</button>
+            </form></td></tr>
         @endforeach
         </tbody>
     </table>

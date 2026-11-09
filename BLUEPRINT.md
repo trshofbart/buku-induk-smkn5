@@ -98,7 +98,7 @@ Navigasi desktop: sidebar kiri. Navigasi HP: menu bawah (Dashboard, Siswa, Buku 
 | **Data Siswa** | `/admin/siswa` | Daftar + pencarian NIS/NISN/nama, filter tahun/jurusan/kelas/status, pagination |
 | Tambah Siswa | `/admin/siswa/create` | Form biodata + orang tua/wali |
 | Detail Siswa | `/admin/siswa/{id}` | Biodata, orang tua, riwayat kelas, ledger, dokumen, transkrip |
-| Import Siswa | `/admin/siswa/import` | Upload CSV (contoh: `public/contoh-import-siswa.csv`) |
+| Import Siswa | `/admin/siswa/import` | Upload Excel/CSV (template .xlsx lewat route `admin.siswa.import.template`) |
 | Export Siswa | `/admin/siswa/export` | Download CSV (filter yang sedang aktif ikut terbawa) |
 | **Buku Induk** | `/admin/buku-induk` | Pilih Tahun Ajaran → pilih Jurusan/Kelas → daftar induk |
 | Data Nominatif | `/admin/buku-induk/nominatif?tahun_ajaran_id=&kelas_id=` | Nominatif per kelas (XII / XIII / X / XI), cetak & export |
@@ -355,7 +355,7 @@ pengumuman (tanpa relasi wajib)
 ## 6. Alur import dari file MASTER lama
 
 1. Di Excel, buka file `MASTER [RPL A].xlsm` → **Save As → CSV** (satu file per jurusan/kelas). Jangan mengubah file aslinya.
-2. Samakan header CSV dengan contoh `public/contoh-import-siswa.csv`: `nis,nisn,nama,jenis_kelamin,tempat_lahir,tanggal_lahir,agama,alamat,no_hp,tahun_ajaran,jurusan,kelas,status,nama_ayah,nama_ibu,no_hp_ortu`.
+2. Samakan header dengan template `template-import-siswa.xlsx` (diunduh dari halaman Import): `nis,nisn,nama,jenis_kelamin,tempat_lahir,tanggal_lahir,agama,alamat,no_hp,tahun_ajaran,jurusan,kelas,status,nama_ayah,nama_ibu,no_hp_ortu`.
 3. Di aplikasi: **Data Siswa → Import** → pilih Tahun Ajaran & Jurusan → upload CSV.
 4. Sistem validasi per baris: NIS wajib & unik, NISN unik bila diisi, tanggal lahir format `YYYY-MM-DD`, jurusan/kelas harus sudah ada di data master.
 5. Baris gagal **tidak menghentikan** baris lain — hasilnya dilaporkan: "24 berhasil, 2 gagal" + daftar baris gagal dan alasannya, supaya bisa diperbaiki dan di-upload ulang.
@@ -409,7 +409,7 @@ Lihat `README.md`. Intinya (5 menit, Windows + Laragon/XAMPP):
 - `VERIFIKASI.md` — hasil verifikasi di mesin pembuat (jujur: apa yang teruji, apa yang belum)
 - `schema.sql` — struktur MySQL untuk import langsung via phpMyAdmin
 - `composer.json`, `.env.example`, `artisan`, `bootstrap/`, `config/`, `public/`, `routes/`, `app/`, `database/`, `resources/` — starter Laravel 12
-- `public/contoh-import-siswa.csv` — contoh format import
+- Template import siswa dibuat lewat route `admin.siswa.import.template` (file .xlsx, bukan file statis — supaya tetap jalan bila aplikasi diakses lewat subpath).
 - `public/manifest.json`, `public/sw.js`, `public/icons/` — PWA
 
 ## 12. Perubahan 2026-11-07 (permintaan Bart)

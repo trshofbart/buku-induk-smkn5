@@ -46,6 +46,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     // --- Data Siswa ---
     Route::get('/siswa/export', [SiswaController::class, 'export'])->name('siswa.export');
     Route::get('/siswa/import', [SiswaController::class, 'importForm'])->name('siswa.import')->middleware('role:admin_tu');
+    Route::get('/siswa/import/template', [SiswaController::class, 'template'])->name('siswa.import.template')->middleware('role:admin_tu');
     Route::post('/siswa/import', [SiswaController::class, 'importStore'])->name('siswa.import.store')->middleware('role:admin_tu');
     Route::get('/siswa/{siswa}/cetak', [SiswaController::class, 'cetak'])->name('siswa.cetak');
     Route::get('/siswa/{siswa}/transkrip-nilai', [NilaiController::class, 'transkrip'])->name('nilai.transkrip');
@@ -108,6 +109,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
         Route::get('/pengguna', [MasterController::class, 'penggunaIndex'])->name('pengguna.index');
         Route::post('/pengguna', [MasterController::class, 'penggunaStore'])->name('pengguna.store');
         Route::post('/pengguna/{user}/toggle', [MasterController::class, 'penggunaToggle'])->name('pengguna.toggle');
+        Route::post('/pengguna/{user}/password', [MasterController::class, 'penggunaPassword'])->name('pengguna.password');
         Route::delete('/pengguna/{user}', [MasterController::class, 'penggunaDestroy'])->name('pengguna.destroy');
 
         Route::get('/log', [MasterController::class, 'logIndex'])->name('log.index');

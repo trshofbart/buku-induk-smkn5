@@ -123,4 +123,93 @@ class AplikasiTest extends TestCase
             ->assertOk()
             ->assertSee('Andi Pratama');
     }
+
+    public function test_template_import_siswa_dapat_diunduh_sebagai_xlsx(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $res = $this->actingAs($admin)->get(route('admin.siswa.import.template'))->assertOk();
+        $this->assertStringContainsString('spreadsheetml.sheet', $res->headers->get('Content-Type'));
+        $this->assertStringContainsString('template-import-siswa.xlsx', $res->headers->get('Content-Disposition'));
+
+        $rows = \App\Support\ExcelExport::baca($res->getContent());
+        $this->assertSame('nis', $rows[0][0]);
+        $this->assertSame('no_hp_ortu', $rows[0][15]);
+        $this->assertSame('20250001', (string) $rows[1][0]);
+        $this->assertSame('Andi Pratama (Contoh)', $rows[1][2]);
+    }
+
+    public function test_import_siswa_dari_xlsx_dan_csv_pemisah_titik_koma(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $tahun = \App\Models\TahunAjaran::orderBy('nama')->firstOrFail();
+        $jurusan = \App\Models\Jurusan::where('kode', 'RPL')->firstOrFail();
+
+        // 1) File .xlsx (template yang diunduh, diisi lalu diunggah kembali).
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet->getActiveSheet()->fromArray([
+            ['nis', 'nisn', 'nama', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'alamat', 'no_hp', 'tahun_ajaran', 'jurusan', 'kelas', 'status', 'nama_ayah', 'nama_ibu', 'no_hp_ortu'],
+            ['20250901', '0031000901', 'Budi Xlsx', 'L', 'Solo', '2008-01-01', 'Islam', 'Jl. Xlsx', '081111', '2025-2026', 'RPL', '', 'aktif', 'Ayah', 'Ibu', '081222'],
+        ], null, 'A1');
+        $pathXlsx = tempnam(sys_get_temp_dir(), 'xlsx');
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($pathXlsx);
+        $fileXlsx = new \Illuminate\Http\UploadedFile($pathXlsx, 'import.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+
+        $this->actingAs($admin)->post(route('admin.siswa.import.store'), [
+            'tahun_ajaran_id' => $tahun->id, 'jurusan_id' => $jurusan->id, 'file' => $fileXlsx,
+        ])->assertRedirect(route('admin.siswa.index'));
+        $this->assertDatabaseHas('siswa', ['nis' => '20250901', 'nama' => 'Budi Xlsx']);
+
+        // 2) File CSV yang disimpan Excel Indonesia (pemisah ';').
+        $csv = "nis;nisn;nama;jenis_kelamin;tempat_lahir;tanggal_lahir;agama;alamat;no_hp;tahun_ajaran;jurusan;kelas;status;nama_ayah;nama_ibu;no_hp_ortu\n"
+            ."20250902;0031000902;Siti TitikKoma;P;Solo;2008-02-02;Islam;Jl. CSV;081333;2025-2026;RPL;;aktif;Ayah;Ibu;081444\n";
+        $pathCsv = tempnam(sys_get_temp_dir(), 'csv');
+        file_put_contents($pathCsv, $csv);
+        $fileCsv = new \Illuminate\Http\UploadedFile($pathCsv, 'import.csv', 'text/csv', null, true);
+
+        $this->actingAs($admin)->post(route('admin.siswa.import.store'), [
+            'tahun_ajaran_id' => $tahun->id, 'jurusan_id' => $jurusan->id, 'file' => $fileCsv,
+        ])->assertRedirect(route('admin.siswa.index'));
+        $this->assertDatabaseHas('siswa', ['nis' => '20250902', 'nama' => 'Siti TitikKoma']);
+    }
+
+    public function test_admin_tu_bisa_mengganti_password_akun(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $guru = User::where('email', 'guru@smkn5.sch.id')->firstOrFail();
+
+        $this->actingAs($admin)->post(route('admin.pengguna.password', $guru), [
+            'password' => 'barupassword',
+            'password_confirmation' => 'barupassword',
+        ])->assertRedirect();
+
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('barupassword', $guru->fresh()->password));
+        $this->assertFalse(\Illuminate\Support\Facades\Hash::check('password', $guru->fresh()->password));
+    }
+
+    public function test_ganti_password_ditolak_bila_konfirmasi_tidak_cocok_atau_terlalu_pendek(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $guru = User::where('email', 'guru@smkn5.sch.id')->firstOrFail();
+
+        $this->actingAs($admin)->post(route('admin.pengguna.password', $guru), [
+            'password' => 'barupassword',
+            'password_confirmation' => 'salahketik',
+        ])->assertSessionHasErrors('password');
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('password', $guru->fresh()->password));
+
+        $this->actingAs($admin)->post(route('admin.pengguna.password', $guru), [
+            'password' => 'pendek',
+            'password_confirmation' => 'pendek',
+        ])->assertSessionHasErrors('password');
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('password', $guru->fresh()->password));
+    }
+
+    public function test_guru_tidak_bisa_mengganti_password_akun(): void
+    {
+        $guru = User::where('email', 'guru@smkn5.sch.id')->firstOrFail();
+        $this->actingAs($guru)->post(route('admin.pengguna.password', $guru), [
+            'password' => 'barupassword',
+            'password_confirmation' => 'barupassword',
+        ])->assertForbidden();
+    }
 }

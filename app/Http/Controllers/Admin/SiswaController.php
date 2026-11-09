@@ -8,7 +8,9 @@ use App\Models\Jurusan;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use App\Support\ExcelExport;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -143,30 +145,54 @@ class SiswaController extends Controller
     }
 
     /**
-     * Import CSV. Baris gagal dilaporkan dan tidak menggagalkan baris lain.
+     * Unduh template import siswa (Excel) — lewat route, bukan link file
+     * statis: link absolut '/contoh-import-siswa.csv' rusak bila aplikasi
+     * diakses lewat subpath (mis. http://IP:8000/buku-induk-smkn5/public/).
+     * File .xlsx juga tidak bergantung pada pemisah regional Excel.
+     */
+    public function template()
+    {
+        $this->authorizeEdit();
+
+        return ExcelExport::unduh(
+            ['nis', 'nisn', 'nama', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'alamat', 'no_hp', 'tahun_ajaran', 'jurusan', 'kelas', 'status', 'nama_ayah', 'nama_ibu', 'no_hp_ortu'],
+            [
+                ['20250001', '0031000001', 'Andi Pratama (Contoh)', 'L', 'Surakarta', '2008-03-15', 'Islam', 'Jl. Contoh No. 1, Surakarta', '081234560001', '2025-2026', 'RPL', 'XII RPL A', 'aktif', 'Bapak Andi', 'Ibu Andi', '081376540001'],
+                ['20250002', '0031000002', 'Citra Lestari (Contoh)', 'P', 'Sukoharjo', '2008-07-22', 'Islam', 'Jl. Contoh No. 2, Surakarta', '081234560002', '2025-2026', 'RPL', 'XI RPL A', 'aktif', 'Bapak Citra', 'Ibu Citra', '081376540002'],
+                ['20250003', '0031000003', 'Galih Saputra (Contoh)', 'L', 'Karanganyar', '2008-01-10', 'Islam', 'Jl. Contoh No. 3, Surakarta', '081234560003', '2025-2026', 'TEI', 'XII TEI A', 'aktif', 'Bapak Galih', 'Ibu Galih', '081376540003'],
+            ],
+            'template-import-siswa.xlsx'
+        );
+    }
+
+    /**
+     * Import CSV/Excel. Baris gagal dilaporkan dan tidak menggagalkan baris lain.
      * Duplikat NIS ditolak — satu NIS hanya boleh satu record (single source of truth).
      */
     public function importStore(Request $request)
     {
         $this->authorizeEdit();
         $request->validate([
-            'file' => 'required|file|mimes:csv,txt|max:5120',
+            'file' => 'required|file|mimes:csv,txt,xlsx,xls|max:5120',
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
             'jurusan_id' => 'required|exists:jurusan,id',
         ]);
 
-        $path = $request->file('file')->getRealPath();
-        $handle = fopen($path, 'r');
-        $header = fgetcsv($handle);
-        $header = array_map(fn ($h) => strtolower(trim($h ?? '')), $header ?? []);
+        try {
+            $rows = $this->bacaFileSiswa($request->file('file'));
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['file' => $e->getMessage()]);
+        }
+
+        $header = array_map(fn ($h) => strtolower(trim((string) ($h ?? ''))), $rows[0] ?? []);
 
         $berhasil = 0;
         $gagal = [];
         $baris = 1;
 
-        while (($row = fgetcsv($handle)) !== false) {
+        foreach (array_slice($rows, 1) as $row) {
             $baris++;
-            if (count(array_filter($row)) === 0) continue;
+            if (count(array_filter($row ?? [])) === 0) continue;
             $d = array_combine($header, array_pad($row, count($header), null));
             $d = array_map(fn ($v) => is_string($v) ? trim($v) : $v, $d);
 
@@ -210,12 +236,37 @@ class SiswaController extends Controller
             ]);
             $berhasil++;
         }
-        fclose($handle);
 
-        ActivityLog::catat('siswa.import', "Import CSV siswa: {$berhasil} berhasil, ".count($gagal).' gagal');
+        ActivityLog::catat('siswa.import', "Import siswa: {$berhasil} berhasil, ".count($gagal).' gagal');
         return redirect()->route('admin.siswa.index')
             ->with('status', "Import selesai: {$berhasil} berhasil, ".count($gagal).' gagal.')
             ->with('import_gagal', $gagal);
+    }
+
+    /** Baca file import siswa (CSV atau Excel) menjadi array baris (semua sel sebagai string). */
+    private function bacaFileSiswa(UploadedFile $file): array
+    {
+        $ext = strtolower($file->getClientOriginalExtension());
+        if ($ext === 'csv' || $ext === 'txt') {
+            $rows = [];
+            $handle = fopen($file->getRealPath(), 'r');
+            $pertama = fgets($handle);
+            rewind($handle);
+            // Pemisah ';' (Excel Indonesia) atau ','.
+            $delim = (substr_count($pertama, ';') > substr_count($pertama, ',')) ? ';' : ',';
+            while (($row = fgetcsv($handle, 0, $delim)) !== false) {
+                $rows[] = $row;
+            }
+            fclose($handle);
+
+            return $rows;
+        }
+        if (! class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
+            throw new \RuntimeException('PhpSpreadsheet belum terpasang. Jalankan: composer require phpoffice/phpspreadsheet');
+        }
+
+        return \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getRealPath())
+            ->getActiveSheet()->toArray(null, true, true, false);
     }
 
     /** Halaman cetak detail siswa (print-to-PDF via window.print). */
