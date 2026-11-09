@@ -324,13 +324,15 @@ CREATE TABLE IF NOT EXISTS `mapel` (
   `nama` varchar(150) NOT NULL,
   `kelompok` enum('A','B','C1','C2','C3') NOT NULL,
   `jurusan_id` bigint UNSIGNED DEFAULT NULL,
+  `salinan_dari_id` bigint UNSIGNED DEFAULT NULL,
   `tingkat` enum('X','XI','XII') DEFAULT NULL,
   `urutan` int NOT NULL DEFAULT 0,
   `kkm_default` decimal(5,2) NOT NULL DEFAULT 76.00,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   UNIQUE KEY `mapel_nama_jurusan_tingkat_unique` (`nama`, `jurusan_id`, `tingkat`),
-  CONSTRAINT `mapel_jurusan_id_foreign` FOREIGN KEY (`jurusan_id`) REFERENCES `jurusan` (`id`) ON DELETE SET NULL
+  CONSTRAINT `mapel_jurusan_id_foreign` FOREIGN KEY (`jurusan_id`) REFERENCES `jurusan` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `mapel_salinan_dari_id_foreign` FOREIGN KEY (`salinan_dari_id`) REFERENCES `mapel` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `nilai` (

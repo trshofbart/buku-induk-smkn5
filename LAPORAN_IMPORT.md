@@ -516,3 +516,35 @@ DIHAPUS dari DB asli setelah import — siswa tersebut kini 0 nilai, sesuai
 kenyataan bahwa kohort 2025-2026 belum ada nilainya. Nilai akhir DB asli:
 506.423 nilai, 5.698 siswa bernilai. Tahun 2011-2012 & 2012-2013 juga
 ditambahkan ke TahunAjaranSeeder (supaya instalasi baru konsisten).
+
+## Dump v7 — perbaikan schema.sql (2026-11-09)
+
+Dua error beruntun di Laragon Bart saat memakai dump v6, keduanya dari
+satu akar masalah: `schema.sql` (sumber CREATE TABLE dump) ketinggalan
+kolom `mapel.salinan_dari_id` dari migrasi 000026. Dump v6 membuat tabel
+`mapel` TANPA kolom itu, tapi INSERT-nya menyebut kolom itu.
+
+- Tanpa `migrate` dulu → import dump v6 gagal: "unknown column
+  salinan_dari_id in field list" (dari INSERT INTO mapel).
+- Dengan `migrate` dulu → migrate mengisi tabel `migrations`, lalu dump
+  bentrok: "duplicate entry 1 for key migrations.PRIMARY".
+
+Perbaikan (commit ini):
+- `schema.sql`: kolom `salinan_dari_id` (bigint UNSIGNED, setelah
+  `jurusan_id`) + FK self-referencing ke `mapel(id)` ON DELETE SET NULL
+  ditambahkan ke CREATE TABLE `mapel`. Pengecekan menyeluruh: ini
+  SATU-SATUNYA kolom yang hilang (kolom 000019, 000022–000025, dan
+  tabel kelengkapan/ekstrakurikuler sudah ada di schema.sql).
+- `storage/imports/sqlite_to_mysql.py`: validasi baru — sebelum menulis
+  dump, setiap kolom di SQLite harus ada di CREATE TABLE schema.sql
+  (dan setiap tabel data harus ada CREATE TABLE-nya); kalau ada yang
+  hilang, script berhenti dengan pesan ERROR yang jelas. Ini mencegah
+  dump tidak konsisten terulang.
+- Dump v7 diregenerasi (580.694 baris, data sama dengan v6) dan
+  diverifikasi konsisten (semua kolom INSERT ada di CREATE TABLE).
+  Dikirim ke Telegram @trshofbot 2026-11-09.
+
+Cara import yang benar (tetap): database KOSONG → import dump saja,
+TANPA `php artisan migrate` sebelum atau sesudah (dump sudah mencatat
+semua 26 migrasi; migrate setelah import akan bilang tidak ada yang
+dijalankan).

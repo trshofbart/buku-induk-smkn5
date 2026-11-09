@@ -40,14 +40,56 @@ def mysql_escape(value):
     s = s.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r").replace("\0", "")
     return "'" + s + "'"
 
+def _create_columns(stmt):
+    """Kolom dari satu blok CREATE TABLE: baris yang diawali `nama`
+    (definisi kolom, bukan baris CONSTRAINT/UNIQUE/KEY)."""
+    cols = set()
+    for line in stmt.splitlines():
+        m = re.match(r"\s*`(\w+)`\s", line)
+        if m:
+            cols.add(m.group(1))
+    return cols
+
+
 def main():
     schema = SCHEMA_SQL.read_text(encoding="utf-8")
     # Ambil blok CREATE TABLE ... ; dari schema.sql (sudah MySQL).
     creates = re.findall(r"CREATE TABLE.*?;\s*\n", schema, flags=re.S | re.I)
     con = sqlite3.connect(f"file:{SQLITE_DB}?mode=ro", uri=True)
     cur = con.cursor()
-    tables = [r[0] for r in cur.execute(
+    # Validasi: schema.sql harus sinkron dengan database SQLite (hasil
+    # semua migrasi). Pernah kejadian (2026-11-09): migrasi 000026
+    # menambah kolom mapel.salinan_dari_id tapi schema.sql lupa
+    # di-update — dump yang dihasilkan jadi tidak bisa di-import
+    # (CREATE TABLE tanpa kolomnya, INSERT menyebut kolomnya).
+    creates_by_table = {}
+    for stmt in creates:
+        m = re.search(r"CREATE TABLE (?:IF NOT EXISTS )?`(\w+)`", stmt, flags=re.I)
+        if m:
+            creates_by_table[m.group(1)] = stmt
+    db_tables = [r[0] for r in cur.execute(
         "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
+    problems = []
+    for table in db_tables:
+        if table in SKIP_TABLES:
+            continue
+        if table not in creates_by_table:
+            problems.append(f"tabel `{table}` tidak ada di schema.sql")
+            continue
+        db_cols = [r[1] for r in cur.execute(f"PRAGMA table_info(`{table}`)")]
+        schema_cols = _create_columns(creates_by_table[table])
+        absent = [c for c in db_cols if c not in schema_cols]
+        if absent:
+            problems.append(
+                f"tabel `{table}` kekurangan kolom di schema.sql: "
+                + ", ".join(absent))
+    if problems:
+        for p in problems:
+            print("ERROR:", p, file=sys.stderr)
+        print("Perbaiki schema.sql dulu (sesuaikan dengan migrasi "
+              "terbaru), lalu jalankan lagi.", file=sys.stderr)
+        return 1
+    tables = db_tables
     out_lines = []
     out_lines.append("-- ============================================================")
     out_lines.append("-- Buku Induk SMKN 5 Surakarta — Dump MySQL (struktur + data)")
