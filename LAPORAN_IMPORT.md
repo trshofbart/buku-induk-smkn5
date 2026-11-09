@@ -382,3 +382,40 @@ Verifikasi: siswa DPIB NIS 19484 — 15/15/12/12/11/11 nilai per semester,
 tahun X 2019-2020 / XI 2020-2021 / XII 2021-2022, ledger 6 semester,
 cetak dirender dan dikirim ke Telegram (contoh-cetak-buku-induk-DPIB-
 lulus-2021-2022.html). Dump v4: 101.339 baris.
+
+---
+
+## Import nilai Leger per kelas 2020-2021 (2026-11-09)
+
+Lanjutan dari 2021-2022. Sumber: `2020-2021/SUDAH DI RANKING/SEMESTER
+1-8` (122 file .xlsx; unduhan: `storage/imports/download_leger_2020.py`).
+Format sama dengan 2021-2022 (K2013 blok 4/5 + Baru NISN blok 3), jadi
+importer `import_nilai_leger.py` dipakai apa adanya dengan
+`--folder 2020-2021` (pemetaan tahun kohort: smt 1-2 → 2018/2019,
+smt 3-4 → 2019/2020, smt 5-6 → 2020/2021; file K2013 memakai baris
+TAHUN PELAJARAN-nya sendiri — TOI, program 4 tahun, geser 1 tahun:
+X 2017/2018, XI 2018/2019, XII 2019/2020, XIII 2020/2021).
+
+Hasil (database-imported.sqlite):
+- nilai: 60.586 → 111.862 (disisip 51.276, duplikat 169, ditimpa 34)
+- siswa bernilai: 865 → 1.573; ledger 20.344 (disisip 3.068, ditimpa
+  828); kelengkapan 4.682; ekskul 5.130; mapel baru 26
+- NIS/NISN tidak ditemukan: 35
+
+Koreksi jurusan (sebelum import): siswa kohort 2020-2021 yang tertulis
+TS (Teknik Sipil) di DB ternyata BKP/DPIB di file Leger kelasnya
+(TS berhenti setelah 2020-2021, digantikan DPIB + BKP; BKP & DPIB
+pertama lulus 2021-2022). Jurusan dikoreksi berdasarkan file kelas:
+TS→BKP 35 siswa, TS→DPIB 68 siswa (tanpa tumpang tindih; 3 siswa TS
+tersisa tanpa file Leger). Tanpa koreksi ini nilai BKP/DPIB tidak
+tercetak karena laporanNilai mengikuti jurusan siswa.
+
+Gap: folder SEMESTER 6 hanya berisi 8 file (TITL, TPM, TOI) — siswa
+DPIB/RPL/TBSM/TEI/TKRO kohort 2020-2021 tidak punya nilai smt 6
+(hanya smt 1-5). BKP punya sebagian smt 6 dari LEGGER lama; TITL/TPM
+punya smt 6 dari file SMT6.
+
+Verifikasi: siswa DPIB NIS 18902 — 15/15/12/12/11 nilai smt 1-5,
+tahun X 2018-2019 / XI 2019-2020 / XII 2020-2021, cetak dirender dan
+dikirim ke Telegram (contoh-cetak-buku-induk-DPIB-lulus-2020-2021.html).
+Dump v5: 111.862 nilai.
