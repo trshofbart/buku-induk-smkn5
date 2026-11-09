@@ -64,6 +64,32 @@ class AplikasiTest extends TestCase
         $res->assertSee('overflow-y-auto', false);
     }
 
+    public function test_sidebar_punya_submenu_yang_bisa_dilipat(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $html = $this->actingAs($admin)->get('/admin')->assertOk()->getContent();
+        // Tiga parent (Buku Induk & Siswa, Konten Publik, Master & Pengguna).
+        // (Dihitung lewat aria-controls, karena string data-submenu-toggle
+        // juga muncul sekali di kode JS penutupnya.)
+        $this->assertSame(3, substr_count($html, 'aria-controls="submenu-')); 
+        $this->assertStringContainsString('Buku Induk &amp; Siswa', $html);
+        $this->assertStringContainsString('Konten Publik', $html);
+        $this->assertStringContainsString('Master &amp; Pengguna', $html);
+        // Di dashboard tidak ada anak yang aktif: semua submenu tertutup.
+        $this->assertSame(3, substr_count($html, 'aria-expanded="false"'));
+    }
+
+    public function test_submenu_parent_terbuka_saat_halaman_anaknya_aktif(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $html = $this->actingAs($admin)->get('/admin/siswa')->assertOk()->getContent();
+        // Hanya parent "Buku Induk & Siswa" yang terbuka; dua lainnya tertutup.
+        $this->assertSame(1, substr_count($html, 'aria-expanded="true"'));
+        $this->assertSame(2, substr_count($html, 'aria-expanded="false"'));
+        // Link anak yang aktif ditandai.
+        $this->assertStringContainsString('bg-green-800 font-semibold', $html);
+    }
+
     public function test_guru_tidak_bisa_membuat_siswa(): void
     {
         $guru = User::where('email', 'guru@smkn5.sch.id')->first();
