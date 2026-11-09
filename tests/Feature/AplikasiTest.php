@@ -55,6 +55,15 @@ class AplikasiTest extends TestCase
         $this->actingAs($admin)->get('/admin/buku-induk')->assertOk();
     }
 
+    public function test_sidebar_admin_fixed_saat_scroll(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $res = $this->actingAs($admin)->get('/admin')->assertOk();
+        // Sidebar menempel di atas viewport setinggi layar, menu bisa di-scroll sendiri.
+        $res->assertSee('sticky top-0 h-screen', false);
+        $res->assertSee('overflow-y-auto', false);
+    }
+
     public function test_guru_tidak_bisa_membuat_siswa(): void
     {
         $guru = User::where('email', 'guru@smkn5.sch.id')->first();

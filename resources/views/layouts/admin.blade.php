@@ -11,13 +11,13 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen">
 <div class="flex min-h-screen">
-    {{-- Sidebar desktop --}}
-    <aside class="hidden md:flex flex-col w-64 bg-green-900 text-white shrink-0">
+    {{-- Sidebar desktop — fixed: tetap terlihat saat konten di-scroll --}}
+    <aside class="hidden md:flex flex-col w-64 bg-green-900 text-white shrink-0 sticky top-0 h-screen">
         <a href="{{ route('admin.dashboard') }}" class="px-5 py-4 border-b border-green-800">
             <span class="block font-bold">Buku Induk SMKN 5</span>
             <span class="block text-xs text-green-300">Panel Pegawai — {{ auth()->user()->roleLabel() }}</span>
         </a>
-        <nav class="flex-1 px-3 py-4 space-y-1 text-sm">
+        <nav class="flex-1 px-3 py-4 space-y-1 text-sm overflow-y-auto">
             <a href="{{ route('admin.dashboard') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Dashboard</a>
             <p class="px-3 pt-3 pb-1 text-xs uppercase text-green-400">Buku Induk &amp; Siswa</p>
             <a href="{{ route('admin.siswa.index') }}" class="block px-3 py-2 rounded-lg hover:bg-green-800">Data Siswa</a>
