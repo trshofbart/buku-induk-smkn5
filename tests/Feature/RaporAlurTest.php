@@ -157,6 +157,12 @@ class RaporAlurTest extends TestCase
         $this->assertStringContainsString('TEKNOLOGI DAN REKAYASA', $html);
         $this->assertStringNotContainsString('HURUF', $html);
         $this->assertStringNotContainsString('nilai_huruf', $html);
+        // Nilai yang kosong tampil sebagai tanda strip (–), bukan teks
+        // '&ndash;' (Blade meng-escape & di dalam {{ }}, jadi entitas
+        // HTML tidak boleh dipakai di sana — pakai karakter langsung).
+        $this->assertStringNotContainsString('&amp;ndash;', $html);
+        $this->assertStringNotContainsString('&ndash;', $html);
+        $this->assertStringContainsString('–', $html);
     }
 
     public function test_leger_excel_memuat_nilai_per_mapel(): void
@@ -216,5 +222,9 @@ class RaporAlurTest extends TestCase
         $this->assertStringContainsString('Rajin.', $html);
         $this->assertStringContainsString('2022-2023', $html);
         $this->assertStringNotContainsString('HURUF', $html);
+        // Mapel tanpa nilai tampil sebagai strip (–), bukan teks '&ndash;'.
+        $this->assertStringNotContainsString('&amp;ndash;', $html);
+        $this->assertStringNotContainsString('&ndash;', $html);
+        $this->assertStringContainsString('–', $html);
     }
 }

@@ -36,7 +36,7 @@
                     <td class="no">{{ $no }}</td>
                     <td>{{ $m->nama }}</td>
                     <td class="angka">{{ rtrim(rtrim($n?->kkm ?? $m->kkm_default, '0'), '.') }}</td>
-                    <td class="angka">{{ $n ? rtrim(rtrim($n->nilai_angka, '0'), '.') : '&ndash;' }}</td>
+                    <td class="angka">{{ $n ? rtrim(rtrim($n->nilai_angka, '0'), '.') : '–' }}</td>
                 </tr>
             @endforeach
         @endforeach

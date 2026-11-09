@@ -32,7 +32,7 @@
     @endphp
     {{-- Tiap tahun ajaran di halaman cetak sendiri. --}}
     @if ($i > 0)<div class="halaman-baru"></div>@endif
-    <p class="subjudul">TAHUN AJARAN : {{ $d['tahun'] ?? '&ndash;' }} &nbsp;&nbsp; TINGKAT : {{ $tingkat }}</p>
+    <p class="subjudul">TAHUN AJARAN : {{ $d['tahun'] ?? '–' }} &nbsp;&nbsp; TINGKAT : {{ $tingkat }}</p>
     <table class="nilai">
         <thead>
             <tr>
@@ -55,9 +55,9 @@
                             <td class="no">{{ $i + 1 }}</td>
                             <td>{{ $r['mapel']->nama }}</td>
                             <td class="angka">{{ rtrim(rtrim($r['smt1']?->kkm ?? $r['mapel']->kkm_default, '0'), '.') }}</td>
-                            <td class="angka">{{ $r['smt1'] ? rtrim(rtrim($r['smt1']->nilai_angka, '0'), '.') : '&ndash;' }}</td>
+                            <td class="angka">{{ $r['smt1'] ? rtrim(rtrim($r['smt1']->nilai_angka, '0'), '.') : '–' }}</td>
                             <td class="angka">{{ rtrim(rtrim($r['smt2']?->kkm ?? $r['mapel']->kkm_default, '0'), '.') }}</td>
-                            <td class="angka">{{ $r['smt2'] ? rtrim(rtrim($r['smt2']->nilai_angka, '0'), '.') : '&ndash;' }}</td>
+                            <td class="angka">{{ $r['smt2'] ? rtrim(rtrim($r['smt2']->nilai_angka, '0'), '.') : '–' }}</td>
                         </tr>
                     @endforeach
                 @endforeach
