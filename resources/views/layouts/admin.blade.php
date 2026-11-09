@@ -11,12 +11,17 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen">
 <div class="flex min-h-screen">
-    {{-- Sidebar desktop — fixed: tetap terlihat saat konten di-scroll --}}
-    <aside class="hidden md:flex flex-col w-64 bg-green-900 text-white shrink-0 sticky top-0 h-screen">
-        <a href="{{ route('admin.dashboard') }}" class="px-5 py-4 border-b border-green-800">
-            <span class="block font-bold">Buku Induk SMKN 5</span>
-            <span class="block text-xs text-green-300">Panel Pegawai — {{ auth()->user()->roleLabel() }}</span>
-        </a>
+    {{-- Sidebar: di desktop menempel (sticky); di HP jadi drawer yang bisa disembunyikan --}}
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 flex flex-col w-64 bg-green-900 text-white shrink-0 transform -translate-x-full transition-transform duration-200 md:sticky md:translate-x-0 md:z-auto top-0 h-screen">
+        <div class="px-5 py-4 border-b border-green-800 flex items-center justify-between gap-2">
+            <a href="{{ route('admin.dashboard') }}" class="flex-1 min-w-0">
+                <span class="block font-bold">Buku Induk SMKN 5</span>
+                <span class="block text-xs text-green-300">Panel Pegawai — {{ auth()->user()->roleLabel() }}</span>
+            </a>
+            <button type="button" id="sidebar-close" class="md:hidden p-2 -mr-2 text-green-200" aria-label="Tutup menu">
+                <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+            </button>
+        </div>
         @php
             // Struktur menu sidebar: tiap parent bisa dilipat/dibuka (sub menu).
             // 'patterns' dipakai untuk membuka parent saat salah satu anaknya aktif.
@@ -87,9 +92,12 @@
     </aside>
 
     {{-- Konten --}}
-    <div class="flex-1 min-w-0 flex flex-col pb-20 md:pb-0">
-        <header class="md:hidden bg-green-800 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-            <a href="{{ route('admin.dashboard') }}" class="font-bold">Buku Induk SMKN 5</a>
+    <div class="flex-1 min-w-0 flex flex-col">
+        <header class="md:hidden bg-green-800 text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-40">
+            <button type="button" id="sidebar-open" class="p-2 -ml-2" aria-label="Buka menu">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+            </button>
+            <a href="{{ route('admin.dashboard') }}" class="font-bold flex-1">Buku Induk SMKN 5</a>
             <span class="text-xs bg-green-700 px-2 py-1 rounded">{{ auth()->user()->roleLabel() }}</span>
         </header>
         <main class="p-4 md:p-6 w-full max-w-6xl mx-auto">
@@ -113,14 +121,8 @@
     </div>
 </div>
 
-{{-- Navigasi bawah khusus HP --}}
-<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow z-40 flex text-xs">
-    <a href="{{ route('admin.dashboard') }}" class="flex-1 text-center py-3">Dashboard</a>
-    <a href="{{ route('admin.siswa.index') }}" class="flex-1 text-center py-3">Siswa</a>
-    <a href="{{ route('admin.buku-induk.index') }}" class="flex-1 text-center py-3">Buku Induk</a>
-    <a href="{{ route('admin.berita.index') }}" class="flex-1 text-center py-3">Berita</a>
-    <form method="POST" action="{{ route('logout') }}" class="flex-1 text-center py-3">@csrf<button>Logout</button></form>
-</nav>
+{{-- Latar gelap di belakang sidebar saat dibuka di HP; klik untuk menutup --}}
+<div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
 <script>
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(function () {});
@@ -133,6 +135,23 @@
             tombol.setAttribute('aria-expanded', String(!tertutup));
             tombol.querySelector('.chevron').classList.toggle('rotate-180', !tertutup);
         });
+    });
+    // Sidebar di HP: drawer yang bisa dibuka/ditutup.
+    var sidebar = document.getElementById('sidebar');
+    var backdrop = document.getElementById('sidebar-backdrop');
+    function bukaSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+    }
+    function tutupSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+    }
+    document.getElementById('sidebar-open').addEventListener('click', bukaSidebar);
+    document.getElementById('sidebar-close').addEventListener('click', tutupSidebar);
+    backdrop.addEventListener('click', tutupSidebar);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') tutupSidebar();
     });
 </script>
 </body>

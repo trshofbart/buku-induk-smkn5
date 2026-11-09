@@ -59,9 +59,26 @@ class AplikasiTest extends TestCase
     {
         $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
         $res = $this->actingAs($admin)->get('/admin')->assertOk();
-        // Sidebar menempel di atas viewport setinggi layar, menu bisa di-scroll sendiri.
-        $res->assertSee('sticky top-0 h-screen', false);
+        // Sidebar menempel di atas viewport setinggi layar di desktop, menu bisa di-scroll sendiri.
+        $res->assertSee('md:sticky', false);
+        $res->assertSee('top-0 h-screen', false);
         $res->assertSee('overflow-y-auto', false);
+    }
+
+    public function test_menu_mobile_jadi_sidebar_yang_bisa_disembunyikan(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $html = $this->actingAs($admin)->get('/admin')->assertOk()->getContent();
+        // Sidebar jadi drawer: tersembunyi di HP (-translate-x-full), terlihat di desktop.
+        $this->assertStringContainsString('id="sidebar"', $html);
+        $this->assertStringContainsString('-translate-x-full', $html);
+        $this->assertStringContainsString('md:translate-x-0', $html);
+        // Tombol hamburger, tombol tutup, dan latar penutup ada.
+        $this->assertStringContainsString('id="sidebar-open"', $html);
+        $this->assertStringContainsString('id="sidebar-close"', $html);
+        $this->assertStringContainsString('id="sidebar-backdrop"', $html);
+        // Navigasi bawah HP sudah dihapus.
+        $this->assertStringNotContainsString('fixed bottom-0', $html);
     }
 
     public function test_sidebar_punya_submenu_yang_bisa_dilipat(): void
