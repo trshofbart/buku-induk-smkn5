@@ -329,3 +329,56 @@ buku sekolah.
 
 Catatan: nilai Keterampilan (Ket) ada di file SMSTR tapi tidak dipakai —
 form HAL_PRINT hanya punya satu kolom NILAI (Pengetahuan).
+
+---
+
+## Import nilai Leger per kelas 2021-2022 (2026-11-09)
+
+Koreksi dari Bart: file Leger per rombel/kelas adalah data lengkap siap
+cetak; file MASTER hanya template. Maka import nilai per mapel diulang
+dari 139 file Leger (`2021-2022/LEDGER/SMT1..SMT8`, satu file per rombel
+per semester) dengan skrip `storage/imports/import_nilai_leger.py`
+(unduhan: `storage/imports/download_leger_2021.py`).
+
+Layout yang dikenali:
+- K2013 (SMT1-2, sebagian SMT3-4): header NIS+NAMA, baris TAHUN
+  PELAJARAN memberi tahun ajaran. Dua varian lebar blok per mapel:
+  5 kolom (N,P,N,P,R) dan 4 kolom (N,P,N,P — tanpa R); lebar dideteksi
+  per file dari jarak dua nama mapel pertama. Rata-rata ledger =
+  rata-rata per-mapel (Peng+Ket)/2.
+- Baru (SMT3-8): header NAMA PESERTA DIDIK + NISN, blok 3 kolom
+  (Nilai P, Nilai K, R); tanpa kolom NIS — cocokkan lewat NISN (buang
+  apostrof di depan). Rata-rata ledger = rata-rata kolom R.
+
+Nama mapel dinormalisasi (kecil, '&' → 'dan', buang tanda baca) +
+peta alias (singkatan, terpotong, varian koma) supaya satu mapel tidak
+terpecah dua baris. Mapel agama non-Islam dibuat umum kelompok A.
+Mapel baru dibuat khusus jurusan (C2 bila pertama muncul di X, C3 bila
+di XI/XII). Kelengkapan (S/I/A) + ekstrakurikuler ikut diimport bila
+ada. Idempotent; nilai Leger MENIMPA nilai MASTER bila berbeda (Leger
+sumber resmi) — 133 nilai ditimpa, termasuk Bahasa Inggris/PJOK yang
+tertular di MASTER-TEI smt 3 (nilainya bersilangan persis).
+
+Hasil (database-imported.sqlite):
+- nilai: 4.020 → 60.586 (disisip 56.770, duplikat 3.311, ditimpa 133)
+- siswa bernilai: 106 → 865 (per jurusan: TPM 141, TOI 139, TKRO 106,
+  TITL 103, TEI 103, RPL 102, DPIB 68, TS 35, BKP 34, TBSM 33)
+- ledger: 17.276 (disisip 4.652, ditimpa 2); kelengkapan 1.638;
+  ekstrakurikuler 1.720; mapel baru 62 (total mapel 84)
+- NIS/NISN tidak ditemukan di DB: 52 (daftar di /tmp/laporan-leger-real.txt)
+- Cakupan file: 9 jurusan. TO, TGB, TKB, TKK, TKP, TS tidak punya file
+  Leger di folder 2021-2022 — nilainya belum masuk.
+
+Koreksi data ikutannya:
+- Nilai C2 MASTER untuk RPL ternyata salah label (nama mapel TEI,
+  nilainya = nilai C2 RPL yang benar — terbukti sama persis untuk
+  68/69 baris): 207 baris dihapus; 3 nilai satu siswa (tidak ada di
+  file Leger SMT1) dipulihkan di bawah nama mapel yang benar.
+- Aturan cetak diubah (commit 6c40fd4): daftar mapel = gabungan umum +
+  khusus jurusan; 7 mapel yang hanya dipakai TEI dipindah jadi khusus
+  TEI (migrasi 000026, sudah diterapkan ke DB import + dump v4).
+
+Verifikasi: siswa DPIB NIS 19484 — 15/15/12/12/11/11 nilai per semester,
+tahun X 2019-2020 / XI 2020-2021 / XII 2021-2022, ledger 6 semester,
+cetak dirender dan dikirim ke Telegram (contoh-cetak-buku-induk-DPIB-
+lulus-2021-2022.html). Dump v4: 101.339 baris.
