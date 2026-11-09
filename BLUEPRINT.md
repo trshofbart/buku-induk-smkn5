@@ -433,13 +433,22 @@ Lihat `README.md`. Intinya (5 menit, Windows + Laragon/XAMPP):
    dihitung ulang per siswa yang berubah. Hanya Admin TU yang boleh import
    (butuh `phpoffice/phpspreadsheet` untuk .xlsx — sudah ditambahkan ke
    `composer.json`).
-4. **Mapel cetak per jurusan.** Aturan baru (`Mapel::untukJurusanTingkat`):
-   per kelompok, bila jurusan punya mapel sendiri di kelompok itu, mapel itu
-   MENGGANTIKAN mapel umum di kelompok tersebut; bila belum punya, dipakai
-   mapel umum. Daftar awal 20 mapel tetap umum (sesuai sheet MAPEL file
-   MASTER TEI & RPL A yang isinya sama). Untuk jurusan lain (TPM, TITL, dst.)
-   belum ada file MASTER di referensi — daftar C2/C3-nya harus dimasukkan
-   lewat menu Mata Pelajaran (isi Jurusan + Tingkat saat menambah mapel).
+4. **Mapel cetak per jurusan.** Aturan (`Mapel::untukJurusanTingkat`):
+   daftar cetak = GABUNGAN mapel umum dan mapel khusus jurusan itu.
+   Pengecualian: mapel khusus yang merupakan SALINAN dari mapel umum
+   (`salinan_dari_id` — fitur "Salin Daftar Umum") menggantikan mapel
+   umum asalnya, walau namanya sudah diubah; mapel khusus yang namanya
+   sama persis dengan mapel umum juga menggantikan yang umum. Aturan
+   lama (khusus menggantikan SELURUH kelompok) dihapus 2026-11-09
+   karena data Leger membuktikan keduanya berdampingan: tiap jurusan
+   mengambil mapel umum (Produk Kreatif, Dasar Listrik) PLUS C2/C3-nya
+   sendiri. Daftar awal 22 mapel umum (sesuai sheet MAPEL file MASTER
+   TEI & RPL A) dikoreksi dari file Leger: 7 mapel yang hanya dipakai
+   TEI (Kerja Bengkel, T. Pemograman, Penerapan Rangkaian, Sistem
+   Pengendali, Mikroprosesor, Pengendali Robotik, Pembuatan Peralatan)
+   kini khusus TEI; 3 mapel agama non-Islam ditambahkan sebagai umum
+   kelompok A. Daftar C2/C3 jurusan lain diisi otomatis oleh import
+   Leger per kelas (lihat §16).
 5. **Cetak Buku Induk: transkrip nilai beda halaman tiap tahun ajaran.**
    Tabel Tingkat X, XI, dan XII masing-masing dimulai di halaman baru
    (page-break sebelum XI dan XII; X mengikuti halaman Laporan Penilaian).
@@ -449,14 +458,16 @@ Lihat `README.md`. Intinya (5 menit, Windows + Laragon/XAMPP):
 Menu baru **Mapel per Jurusan** (Master & Pengguna, Admin TU):
 `/admin/master/mapel-per-jurusan`. Pilih jurusan → tampil daftar C2/C3
 yang akan tercetak untuk jurusan itu, per tingkat (X/XI/XII), dengan tanda
-**Umum** (dipakai semua jurusan) atau **Khusus <kode>** (hanya jurusan ini,
-menggantikan mapel umum di kelompok yang sama). Bila jurusan masih memakai
-daftar umum, ada tombol **Salin Daftar Umum** — menyalin C2/C3 umum menjadi
-daftar khusus jurusan itu, lalu namanya bisa diubah/dihapus sesuai daftar
-jurusan. Tambah mapel langsung dari halaman ini (nama, kelompok C2/C3,
-tingkat, urutan, KKM); hapus hanya untuk mapel khusus (mapel umum dihapus
-dari menu Mata Pelajaran, karena berpengaruh ke semua jurusan). Cetakan
-memakai aturan `Mapel::untukJurusanTingkat` (lihat §12 poin 4).
+**Umum** (dipakai semua jurusan) atau **Khusus <kode>** (hanya jurusan ini).
+Mapel khusus yang disalin dari daftar umum menggantikan mapel umum asalnya;
+mapel khusus lain (mis. dari import Leger) ditambahkan di samping mapel
+umum. Bila jurusan masih memakai daftar umum, ada tombol **Salin Daftar
+Umum** — menyalin C2/C3 umum menjadi daftar khusus jurusan itu, lalu
+namanya bisa diubah/dihapus sesuai daftar jurusan. Tambah mapel langsung
+dari halaman ini (nama, kelompok C2/C3, tingkat, urutan, KKM); hapus hanya
+untuk mapel khusus (mapel umum dihapus dari menu Mata Pelajaran, karena
+berpengaruh ke semua jurusan). Cetakan memakai aturan
+`Mapel::untukJurusanTingkat` (lihat §12 poin 4).
 
 ## 14. Alur e-Rapor SMK 2025.1 yang diadaptasi (2026-11-07)
 
@@ -510,3 +521,43 @@ dan leger `;`, export siswa `,`). Sekarang ketiganya diunduh sebagai
 tebal, lebar kolom mengikuti isi (dibatasi 50 karakter, teks dibungkus),
 baris header dibekukan. Import nilai tetap menerima CSV maupun .xlsx,
 jadi template .xlsx yang diisi di Excel bisa langsung di-upload kembali.
+
+## 16. Import nilai dari file Leger per kelas (2026-11-09)
+
+Koreksi penting dari Bart: **file Leger per kelas (rombel) di Drive adalah
+data lengkap yang siap cetak; file MASTER hanya template.** Import lama
+hanya memakai MASTER (nilai per mapel cuma 4.020 untuk 106 siswa). Import
+baru memakai 139 file Leger 2021-2022 (`LEDGER/SMT1..SMT8`, satu file per
+rombel per semester) — skrip `storage/imports/import_nilai_leger.py`
+(dan `download_leger_2021.py` untuk mengunduhnya dari Drive).
+
+Dua layout dikenali otomatis: **K2013** (header NIS+NAMA; baris TAHUN
+PELAJARAN memberi tahun ajaran; ada dua varian lebar blok per mapel —
+5 kolom bila ada kolom R, 4 kolom bila tidak; lebar dideteksi per file
+dari jarak dua nama mapel pertama) dan **Baru** (header NAMA PESERTA
+DIDIK + NISN; blok 3 kolom Nilai P / Nilai K / R; tanpa kolom NIS —
+cocokkan lewat NISN, buang apostrof di depan). Nilai yang diimport =
+Pengetahuan (kolom pertama tiap blok); rata-rata ledger = rata-rata
+per-mapel (Peng+Ket)/2. Kelengkapan (S/I/A) + ekstrakurikuler ikut
+diimport bila ada di file. Tahun ajaran per semester: dari baris TAHUN
+PELAJARAN bila ada, jika tidak dari semester (kohort lulus G: smt 1-2
+→ G-2, 3-4 → G-1, 5-6 → G, 7-8 → G).
+
+Aturan mapel: nama dinormalisasi (kecil, '&' → 'dan', buang tanda baca)
++ peta alias untuk singkatan/varian penulisan, supaya varian nama yang
+sama bertemu di satu baris mapel. Mapel agama non-Islam dibuat sebagai
+umum kelompok A. Mapel yang belum ada dibuat khusus jurusan (C2 bila
+pertama muncul di tingkat X, C3 bila di XI/XII). Import idempotent
+(INSERT OR IGNORE); **bila Leger memberi nilai berbeda dari nilai lama
+(mis. dari MASTER), nilai Leger MENIMPA** — Leger adalah sumber resmi,
+MASTER hanya template. Penimpaan dicatat di laporan.
+
+Hasil import 2021-2022: nilai 4.020 → ~60.790, siswa bernilai 106 →
+~865, ledger ~17.276, kelengkapan 1.638, ekskul 1.720; mapel baru
+~62 (C2/C3 per jurusan). Cakupan file: 9 jurusan (BKP, DPIB, RPL,
+TBSM, TEI, TITL, TKRO, TOI, TPM); TO/TGB/TKB/TKK/TKP/TS tidak punya
+file Leger di folder 2021-2022. 52 siswa di file Leger tidak ditemukan
+di database (NIS/NISN tidak ada) — perlu ditindaklanjuti dengan data
+siswa yang benar. Temuan: nilai C2 MASTER untuk RPL ternyata salah
+label (nama mapel TEI, nilainya = nilai C2 RPL yang benar) — 207 baris
+itu dihapus setelah Leger mengisi nilai yang benar.

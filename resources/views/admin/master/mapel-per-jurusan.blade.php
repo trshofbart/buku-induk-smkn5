@@ -13,7 +13,7 @@
     <a href="{{ route('admin.mapel.index') }}" class="border border-green-700 text-green-700 px-4 py-2 rounded-lg">Semua Mata Pelajaran</a>
 </form>
 
-<p class="text-sm text-slate-500 mb-4">Di bawah ini adalah daftar mata pelajaran <strong>C2 (Dasar Program Keahlian)</strong> dan <strong>C3 (Kompetensi Keahlian)</strong> yang akan tercetak di Buku Induk untuk jurusan <strong>{{ $jurusan->nama }}</strong>. Mapel bertanda <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs">Umum</span> dipakai bersama semua jurusan; mapel bertanda <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">Khusus {{ $jurusan->kode }}</span> hanya untuk jurusan ini dan menggantikan mapel umum di kelompok yang sama.</p>
+<p class="text-sm text-slate-500 mb-4">Di bawah ini adalah daftar mata pelajaran <strong>C2 (Dasar Program Keahlian)</strong> dan <strong>C3 (Kompetensi Keahlian)</strong> yang akan tercetak di Buku Induk untuk jurusan <strong>{{ $jurusan->nama }}</strong>. Mapel bertanda <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs">Umum</span> dipakai bersama semua jurusan; mapel bertanda <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">Khusus {{ $jurusan->kode }}</span> hanya untuk jurusan ini. Mapel khusus yang disalin dari daftar umum menggantikan mapel umum asalnya; mapel khusus lain (mis. dari import data) ditambahkan di samping mapel umum.</p>
 
 @if (! $punyaKhusus)
 <form method="POST" action="{{ route('admin.mapel.salin') }}" class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">

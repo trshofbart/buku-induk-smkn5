@@ -149,8 +149,8 @@ class MasterController extends Controller
             ? Jurusan::findOrFail($request->jurusan_id)
             : Jurusan::orderBy('nama')->firstOrFail();
 
-        // Daftar efektif per tingkat: mapel khusus jurusan menggantikan
-        // mapel umum di kelompok yang sama (aturan Mapel::untukJurusanTingkat).
+        // Daftar efektif per tingkat: gabungan mapel umum + khusus jurusan
+        // (aturan Mapel::untukJurusanTingkat; salinan menggantikan asalnya).
         $daftar = [];
         foreach (['X', 'XI', 'XII'] as $tingkat) {
             $daftar[$tingkat] = Mapel::untukJurusanTingkat($jurusan->id, $tingkat)
@@ -176,7 +176,8 @@ class MasterController extends Controller
         foreach (Mapel::whereNull('jurusan_id')->whereIn('kelompok', ['C2', 'C3'])->get() as $m) {
             $baru = Mapel::firstOrCreate(
                 ['nama' => $m->nama, 'jurusan_id' => $data['jurusan_id'], 'tingkat' => $m->tingkat],
-                ['kelompok' => $m->kelompok, 'urutan' => $m->urutan, 'kkm_default' => $m->kkm_default]
+                ['kelompok' => $m->kelompok, 'urutan' => $m->urutan, 'kkm_default' => $m->kkm_default,
+                    'salinan_dari_id' => $m->id]
             );
             if ($baru->wasRecentlyCreated) {
                 $disalin++;

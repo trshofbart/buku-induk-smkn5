@@ -150,7 +150,7 @@ class NilaiTest extends TestCase
         ])->assertForbidden();
     }
 
-    public function test_mapel_khusus_jurusan_menggantikan_mapel_umum_di_kelompok_yang_sama(): void
+    public function test_mapel_khusus_jurusan_ditambahkan_di_samping_mapel_umum(): void
     {
         $siswa = Siswa::whereNotNull('kelas_id')->firstOrFail();
         Mapel::create([
@@ -164,8 +164,11 @@ class NilaiTest extends TestCase
 
         $laporan = $siswa->laporanNilai();
         $c3 = $laporan['X']['kelompok']['C3'] ?? [];
-        $this->assertCount(1, $c3);
-        $this->assertSame('Elektronika Khusus', $c3[0]['mapel']->nama);
+        $nama = collect($c3)->map(fn ($r) => $r['mapel']->nama)->all();
+        // Mapel khusus (mis. dari import Leger) ditambahkan di samping
+        // mapel umum yang memang diambil jurusan itu — bukan menggantikannya.
+        $this->assertContains('Elektronika Khusus', $nama);
+        $this->assertContains('Produk Kreatif dan Kewirausahaan', $nama);
         // Kelompok lain tetap memakai mapel umum.
         $this->assertNotEmpty($laporan['X']['kelompok']['A'] ?? []);
     }
