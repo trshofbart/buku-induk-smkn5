@@ -151,7 +151,10 @@ class MasterController extends Controller
             'tingkat' => 'nullable|in:X,XI,XII',
             'urutan' => 'nullable|integer|min:0',
             'kkm_default' => 'nullable|numeric|min:0|max:100',
+            'tampil_cetak' => 'nullable|boolean',
         ]);
+        // Checkbox yang tidak dicentang tidak terkirim — paksa ke false.
+        $data['tampil_cetak'] = $request->boolean('tampil_cetak');
         // Kombinasi (nama, jurusan, tingkat) harus unik — kecuali mapel ini sendiri.
         $duplikat = Mapel::where('nama', $data['nama'])
             ->where('jurusan_id', $data['jurusan_id'] ?? null)

@@ -10,12 +10,12 @@ class Mapel extends Model
 
     protected $fillable = [
         'kode', 'nama', 'kelompok', 'jurusan_id', 'tingkat', 'urutan', 'kkm_default',
-        'salinan_dari_id',
+        'salinan_dari_id', 'tampil_cetak',
     ];
 
     protected function casts(): array
     {
-        return ['kkm_default' => 'decimal:2'];
+        return ['kkm_default' => 'decimal:2', 'tampil_cetak' => 'boolean'];
     }
 
     public const KELOMPOK = [
@@ -59,9 +59,11 @@ class Mapel extends Model
      * admin; dan mapel khusus yang namanya sama persis dengan mapel
      * umum juga menggantikan yang umum (bukan duplikat).
      */
-    public static function untukJurusanTingkat(?int $jurusanId, ?string $tingkat): \Illuminate\Support\Collection
+    public static function untukJurusanTingkat(?int $jurusanId, ?string $tingkat, bool $hanyaTampilCetak = false): \Illuminate\Support\Collection
     {
-        $semua = static::untukTingkat($tingkat)->terurut()->get();
+        $semua = static::untukTingkat($tingkat)
+            ->when($hanyaTampilCetak, fn ($q) => $q->where('tampil_cetak', true))
+            ->terurut()->get();
         $khusus = $semua->where('jurusan_id', $jurusanId);
         $umum = $semua->whereNull('jurusan_id');
 

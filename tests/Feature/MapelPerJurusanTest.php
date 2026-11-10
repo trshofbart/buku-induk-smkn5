@@ -241,4 +241,58 @@ class MapelPerJurusanTest extends TestCase
             'nama' => 'Fisika', 'kelompok' => 'C1', 'urutan' => 99,
         ])->assertForbidden();
     }
+
+    public function test_mapel_yang_disembunyikan_tidak_tampil_di_cetak_tapi_tetap_di_menu(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $jurusan = Jurusan::where('kode', 'TKJ')->firstOrFail();
+        $siswa = Siswa::whereNotNull('kelas_id')->firstOrFail();
+        $siswa->update(['jurusan_id' => $jurusan->id]);
+
+        // Default: tampil di cetak.
+        $fisika = Mapel::where('nama', 'Fisika')->firstOrFail();
+        $this->assertTrue($fisika->tampil_cetak);
+
+        $fisika->update(['tampil_cetak' => false]);
+
+        // Tidak tampil di laporanNilai (cetak).
+        $laporan = $siswa->laporanNilai();
+        $namaC1 = collect($laporan['X']['kelompok']['C1'] ?? [])->map(fn ($r) => $r['mapel']->nama);
+        $this->assertNotContains('Fisika', $namaC1);
+
+        // Tapi tetap tampil di menu Mapel per Jurusan (supaya bisa diaktifkan lagi).
+        $this->actingAs($admin)->get(route('admin.mapel.perjurusan', ['jurusan_id' => $jurusan->id]))
+            ->assertOk()
+            ->assertSee('Fisika')
+            ->assertSee('Disembunyikan dari cetak');
+    }
+
+    public function test_admin_bisa_menyembunyikan_dan_menampilkan_lagi_mapel_lewat_edit(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $mapel = Mapel::where('nama', 'Fisika')->firstOrFail();
+
+        // Matikan: checkbox tidak dicentang = tidak terkirim.
+        $this->actingAs($admin)->put(route('admin.mapel.update', $mapel), [
+            'nama' => 'Fisika',
+            'kelompok' => 'C1',
+            'jurusan_id' => null,
+            'tingkat' => null,
+            'urutan' => 11,
+            'kkm_default' => 76,
+        ])->assertRedirect(route('admin.mapel.index'));
+        $this->assertDatabaseHas('mapel', ['id' => $mapel->id, 'tampil_cetak' => false]);
+
+        // Nyalakan lagi: checkbox dicentang.
+        $this->actingAs($admin)->put(route('admin.mapel.update', $mapel), [
+            'nama' => 'Fisika',
+            'kelompok' => 'C1',
+            'jurusan_id' => null,
+            'tingkat' => null,
+            'urutan' => 11,
+            'kkm_default' => 76,
+            'tampil_cetak' => '1',
+        ])->assertRedirect(route('admin.mapel.index'));
+        $this->assertDatabaseHas('mapel', ['id' => $mapel->id, 'tampil_cetak' => true]);
+    }
 }

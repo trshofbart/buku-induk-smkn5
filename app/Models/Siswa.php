@@ -91,7 +91,9 @@ class Siswa extends Model
                 $ledgerPerSemester[$s] = $cocok ?? $rows->first();
             }
             $kelompok = [];
-            foreach (Mapel::untukJurusanTingkat($this->jurusan_id, $tingkat) as $m) {
+            // Hanya mapel yang ditandai tampil di cetak (diatur lewat menu
+            // Mata Pelajaran). Nilai mapel yang disembunyikan tetap tersimpan.
+            foreach (Mapel::untukJurusanTingkat($this->jurusan_id, $tingkat, true) as $m) {
                 $kelompok[$m->kelompok][] = [
                     'mapel' => $m,
                     'smt1' => $nilaiByMapelSemester->get($m->id.'-'.$smts[0])?->first(),

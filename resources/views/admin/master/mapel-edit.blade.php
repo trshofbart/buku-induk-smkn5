@@ -62,6 +62,11 @@
             <button class="bg-green-700 text-white px-4 py-2 rounded-lg">Simpan Perubahan</button>
             <a href="{{ $kembali ?? route('admin.mapel.index') }}" class="border border-slate-300 px-4 py-2 rounded-lg">Batal</a>
         </div>
+
+        <label class="flex items-start gap-2 pt-2 border-t">
+            <input type="checkbox" name="tampil_cetak" value="1" @checked(old('tampil_cetak', $mapel->tampil_cetak)) class="mt-1">
+            <span class="text-sm"><span class="font-semibold">Tampilkan di lembar cetak</span><br><span class="text-slate-500">Bila dimatikan, mapel ini tidak muncul di cetak Buku Induk / Transkrip. Nilainya tetap tersimpan dan tetap bisa diinput.</span></span>
+        </label>
     </form>
 </div>
 @endsection

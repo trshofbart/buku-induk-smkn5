@@ -327,6 +327,7 @@ CREATE TABLE IF NOT EXISTS `mapel` (
   `salinan_dari_id` bigint UNSIGNED DEFAULT NULL,
   `tingkat` enum('X','XI','XII') DEFAULT NULL,
   `urutan` int NOT NULL DEFAULT 0,
+  `tampil_cetak` tinyint(1) NOT NULL DEFAULT 1,
   `kkm_default` decimal(5,2) NOT NULL DEFAULT 76.00,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
