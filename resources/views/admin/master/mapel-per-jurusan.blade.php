@@ -61,7 +61,7 @@
                     <td class="px-4 py-2">{{ $m->tingkat ?? 'Semua' }}</td>
                     <td class="px-4 py-2">{{ $m->kkm_default }}</td>
                     <td class="px-4 py-2">@if ($m->jurusan_id)<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs">Khusus {{ $jurusan->kode }}</span>@else<span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs">Umum</span>@endif</td>
-                    <td class="px-4 py-2"><div class="flex gap-3"><a href="{{ route('admin.mapel.edit', ['mapel' => $m->id, 'kembali' => request()->getRequestUri()]) }}" class="text-green-700">Edit</a>@if ($m->jurusan_id)<form method="POST" action="{{ route('admin.mapel.destroy', $m) }}" onsubmit="return confirm('Hapus mapel ini dari jurusan {{ $jurusan->nama }}?')">@csrf @method('DELETE')<button class="text-red-700">Hapus</button></form>@endif</div></td>
+                    <td class="px-4 py-2"><div class="flex gap-3"><a href="{{ route('admin.mapel.edit', ['mapel' => $m->id, 'kembali' => request()->getPathInfo().(request()->getQueryString() ? '?'.request()->getQueryString() : '')]) }}" class="text-green-700">Edit</a>@if ($m->jurusan_id)<form method="POST" action="{{ route('admin.mapel.destroy', $m) }}" onsubmit="return confirm('Hapus mapel ini dari jurusan {{ $jurusan->nama }}?')">@csrf @method('DELETE')<button class="text-red-700">Hapus</button></form>@endif</div></td>
                 </tr>
             @endforeach
             </tbody>

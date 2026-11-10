@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Mapel;
 use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -151,5 +152,43 @@ class SortFilterTest extends TestCase
         $this->actingAs($admin)->get(route('admin.mapel.index', ['per_page' => 100]))
             ->assertOk()
             ->assertViewHas('mapel', fn ($p) => $p->perPage() === 100);
+    }
+
+    public function test_kembali_tidak_menggandakan_prefix_subdirektori(): void
+    {
+        // Regresi: di Laragon aplikasi dibuka lewat subdirektori
+        // (/buku-induk-smkn5/public). Link Edit dulu memakai
+        // getRequestUri() (membawa prefix subdirektori) sehingga
+        // redirect()->to() menambahkan prefix itu sekali lagi dan
+        // URL jadi …/public/buku-induk-smkn5/public/… (404).
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $mapel = Mapel::where('nama', 'Fisika')->firstOrFail();
+
+        // Link Edit di halaman Mapel per Jurusan harus membawa kembali
+        // yang relatif terhadap app root (tanpa prefix subdirektori).
+        $response = $this->actingAs($admin)->get(route('admin.mapel.perjurusan', ['jurusan_id' => 1]));
+        $response->assertOk();
+        $this->assertStringContainsString(
+            'kembali=%2Fadmin%2Fmapel-per-jurusan',
+            $response->getContent(),
+            'Link Edit harus memakai path relatif app root, bukan getRequestUri()'
+        );
+        $this->assertStringNotContainsString(
+            'kembali=%2Fbuku-induk-smkn5',
+            $response->getContent()
+        );
+
+        // Simpan perubahan lewat Edit dengan kembali yang relatif —
+        // redirect harus ke URL itu persis, bukan ganda.
+        $this->actingAs($admin)->put(route('admin.mapel.update', $mapel), [
+            'nama' => 'Fisika',
+            'kelompok' => 'C1',
+            'jurusan_id' => null,
+            'tingkat' => null,
+            'urutan' => 11,
+            'kkm_default' => 76,
+            'tampil_cetak' => '1',
+            'kembali' => '/admin/mapel-per-jurusan?jurusan_id=1',
+        ])->assertRedirect('/admin/mapel-per-jurusan?jurusan_id=1');
     }
 }

@@ -205,6 +205,15 @@ class MasterController extends Controller
         if (! $url || ! str_starts_with($url, '/') || str_starts_with($url, '//')) {
             return null;
         }
+        // Bila URL masih membawa prefix subdirektori aplikasi (mis.
+        // /buku-induk-smkn5/public/... dari getRequestUri lama), buang
+        // prefix itu — redirect()->to() sudah menambahkan prefix
+        // tersebut sendiri, sehingga tanpa ini URL-nya jadi ganda
+        // (…/public/buku-induk-smkn5/public/…) dan 404.
+        $base = request()->getBaseUrl();
+        if ($base !== '' && str_starts_with($url, $base.'/')) {
+            $url = substr($url, strlen($base));
+        }
         return $url;
     }
 
