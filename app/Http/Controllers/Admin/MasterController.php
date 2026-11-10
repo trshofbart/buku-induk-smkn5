@@ -17,9 +17,15 @@ use Illuminate\Validation\Rule;
 class MasterController extends Controller
 {
     // ---------- Tahun Ajaran ----------
-    public function tahunIndex()
+    public function tahunIndex(Request $request)
     {
-        return view('admin.master.tahun-ajaran', ['tahun' => TahunAjaran::orderByDesc('nama')->paginate(15)]);
+        $tahun = $this->terapkanSort(
+            $request,
+            TahunAjaran::query(),
+            ['nama', 'tanggal_mulai', 'is_active'],
+            'nama', 'desc'
+        )->paginate(15)->withQueryString();
+        return view('admin.master.tahun-ajaran', ['tahun' => $tahun]);
     }
 
     public function tahunStore(Request $request)
@@ -49,9 +55,15 @@ class MasterController extends Controller
     }
 
     // ---------- Jurusan ----------
-    public function jurusanIndex()
+    public function jurusanIndex(Request $request)
     {
-        return view('admin.master.jurusan', ['jurusan' => Jurusan::withCount('siswa')->orderBy('nama')->paginate(15)]);
+        $jurusan = $this->terapkanSort(
+            $request,
+            Jurusan::withCount('siswa'),
+            ['kode', 'nama', 'program_studi', 'siswa_count'],
+            'nama'
+        )->paginate(15)->withQueryString();
+        return view('admin.master.jurusan', ['jurusan' => $jurusan]);
     }
 
     public function jurusanStore(Request $request)
@@ -76,10 +88,16 @@ class MasterController extends Controller
     }
 
     // ---------- Kelas ----------
-    public function kelasIndex()
+    public function kelasIndex(Request $request)
     {
+        $kelas = $this->terapkanSort(
+            $request,
+            Kelas::with(['jurusan', 'tahunAjaran']),
+            ['nama', 'tahun_ajaran_id', 'wali_kelas'],
+            'tahun_ajaran_id', 'desc'
+        )->orderBy('nama')->paginate(15)->withQueryString();
         return view('admin.master.kelas', [
-            'kelas' => Kelas::with(['jurusan', 'tahunAjaran'])->orderByDesc('tahun_ajaran_id')->orderBy('nama')->paginate(15),
+            'kelas' => $kelas,
             'tahunAjaran' => TahunAjaran::orderByDesc('nama')->get(),
             'jurusan' => Jurusan::orderBy('nama')->get(),
         ]);
@@ -108,11 +126,22 @@ class MasterController extends Controller
     }
 
     // ---------- Mata Pelajaran ----------
-    public function mapelIndex()
+    public function mapelIndex(Request $request)
     {
+        $query = Mapel::with('jurusan')
+            ->when($request->filled('q'), fn ($q) => $q->where('nama', 'like', '%'.$request->q.'%'));
+
+        if ($request->filled('sort') && in_array($request->sort, ['kelompok', 'nama', 'tingkat', 'urutan', 'kkm_default'], true)) {
+            $arah = strtolower((string) $request->input('dir', 'asc')) === 'desc' ? 'desc' : 'asc';
+            $query->orderBy($request->sort, $arah)->orderBy('nama');
+        } else {
+            $query->orderBy('kelompok')->orderBy('urutan');
+        }
+
         return view('admin.master.mapel', [
-            'mapel' => Mapel::with('jurusan')->orderBy('kelompok')->orderBy('urutan')->paginate(25),
+            'mapel' => $query->paginate(25)->withQueryString(),
             'jurusan' => Jurusan::orderBy('nama')->get(),
+            'q' => $request->q,
         ]);
     }
 
@@ -199,7 +228,12 @@ class MasterController extends Controller
         // (aturan Mapel::untukJurusanTingkat; salinan menggantikan asalnya).
         $daftar = [];
         foreach (['X', 'XI', 'XII'] as $tingkat) {
-            $daftar[$tingkat] = Mapel::untukJurusanTingkat($jurusan->id, $tingkat)
+            $list = Mapel::untukJurusanTingkat($jurusan->id, $tingkat);
+            if ($request->filled('q')) {
+                $q = mb_strtolower($request->q);
+                $list = $list->filter(fn ($m) => str_contains(mb_strtolower($m->nama), $q));
+            }
+            $daftar[$tingkat] = $list
                 ->whereIn('kelompok', ['C1', 'C2', 'C3'])
                 ->groupBy('kelompok');
         }
@@ -211,6 +245,7 @@ class MasterController extends Controller
             'daftarJurusan' => Jurusan::orderBy('nama')->get(),
             'daftar' => $daftar,
             'punyaKhusus' => $punyaKhusus,
+            'q' => $request->q,
         ]);
     }
 
@@ -259,9 +294,17 @@ class MasterController extends Controller
     }
 
     // ---------- Pengguna (hanya Admin TU — dijaga route role:admin_tu) ----------
-    public function penggunaIndex()
+    public function penggunaIndex(Request $request)
     {
-        return view('admin.master.pengguna', ['pengguna' => User::orderBy('name')->paginate(15)]);
+        $pengguna = $this->terapkanSort(
+            $request,
+            User::when($request->filled('q'), fn ($q) => $q->where(function ($w) use ($request) {
+                $w->where('name', 'like', '%'.$request->q.'%')->orWhere('email', 'like', '%'.$request->q.'%');
+            })),
+            ['name', 'email', 'role', 'is_active'],
+            'name'
+        )->paginate(15)->withQueryString();
+        return view('admin.master.pengguna', ['pengguna' => $pengguna, 'q' => $request->q]);
     }
 
     public function penggunaStore(Request $request)
@@ -308,10 +351,16 @@ class MasterController extends Controller
     }
 
     // ---------- Log Aktivitas (read-only) ----------
-    public function logIndex()
+    public function logIndex(Request $request)
     {
+        $log = $this->terapkanSort(
+            $request,
+            ActivityLog::with('user'),
+            ['created_at', 'aksi'],
+            'created_at', 'desc'
+        )->paginate(25)->withQueryString();
         return view('admin.master.log', [
-            'log' => ActivityLog::with('user')->latest('created_at')->paginate(25),
+            'log' => $log,
         ]);
     }
 }

@@ -13,7 +13,7 @@
 </form>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">
-        <thead><tr class="bg-slate-100 text-left"><th class="px-4 py-3">Kelas</th><th class="px-4 py-3">Jurusan</th><th class="px-4 py-3">Tahun</th><th class="px-4 py-3">Wali Kelas</th><th class="px-4 py-3">Aksi</th></tr></thead>
+        <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Kelas', 'key' => 'nama'])<th class="px-4 py-3">Jurusan</th>@include('admin._sort-th', ['label' => 'Tahun', 'key' => 'tahun_ajaran_id'])@include('admin._sort-th', ['label' => 'Wali Kelas', 'key' => 'wali_kelas'])<th class="px-4 py-3">Aksi</th></tr></thead>
         <tbody>
         @foreach ($kelas as $k)
             <tr class="border-t"><td class="px-4 py-3 font-semibold">{{ $k->nama }}</td><td class="px-4 py-3">{{ $k->jurusan?->nama }}</td><td class="px-4 py-3">{{ $k->tahunAjaran?->nama }}</td><td class="px-4 py-3">{{ $k->wali_kelas ?? '-' }}</td><td class="px-4 py-3"><form method="POST" action="{{ route('admin.kelas.destroy', $k) }}" onsubmit="return confirm('Hapus kelas ini?')">@csrf @method('DELETE')<button class="text-red-700">Hapus</button></form></td></tr>

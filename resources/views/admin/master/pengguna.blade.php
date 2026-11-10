@@ -12,9 +12,15 @@
     <input name="nip" placeholder="NIP (opsional)" class="border rounded-lg px-3 py-2">
     <button class="bg-green-700 text-white px-4 py-2 rounded-lg">+ Buat Akun</button>
 </form>
+
+<form method="GET" class="bg-white rounded-xl shadow p-4 flex gap-2 mb-4">
+    <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari nama / email pegawai..." class="border rounded-lg px-3 py-2 flex-1">
+    <button class="bg-green-700 text-white px-4 py-2 rounded-lg">Cari</button>
+    @if (! empty($q))<a href="{{ route('admin.pengguna.index') }}" class="border border-slate-300 px-4 py-2 rounded-lg">Reset</a>@endif
+</form>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">
-        <thead><tr class="bg-slate-100 text-left"><th class="px-4 py-3">Nama</th><th class="px-4 py-3">Email</th><th class="px-4 py-3">Role</th><th class="px-4 py-3">Status</th><th class="px-4 py-3">Aksi</th></tr></thead>
+        <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Nama', 'key' => 'name'])@include('admin._sort-th', ['label' => 'Email', 'key' => 'email'])@include('admin._sort-th', ['label' => 'Role', 'key' => 'role'])@include('admin._sort-th', ['label' => 'Status', 'key' => 'is_active'])<th class="px-4 py-3">Aksi</th></tr></thead>
         <tbody>
         @foreach ($pengguna as $u)
             <tr class="border-t"><td class="px-4 py-3 font-semibold">{{ $u->name }}</td><td class="px-4 py-3">{{ $u->email }}</td><td class="px-4 py-3">{{ $u->roleLabel() }}</td><td class="px-4 py-3">{{ $u->is_active ? 'Aktif' : 'Nonaktif' }}</td><td class="px-4 py-3 whitespace-nowrap"><form method="POST" action="{{ route('admin.pengguna.toggle', $u) }}" class="inline">@csrf<button class="text-blue-700">{{ $u->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button></form> | <form method="POST" action="{{ route('admin.pengguna.destroy', $u) }}" class="inline" onsubmit="return confirm('Hapus akun ini?')">@csrf @method('DELETE')<button class="text-red-700">Hapus</button></form>

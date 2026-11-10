@@ -19,11 +19,14 @@ class SiswaController extends Controller
     /** Daftar + pencarian NIS/NISN/nama + filter + pagination. */
     public function index(Request $request)
     {
-        $siswa = Siswa::with(['jurusan', 'kelas', 'tahunAjaran'])
-            ->cari($request->q)
-            ->filter($request->only(['tahun_ajaran_id', 'jurusan_id', 'kelas_id', 'status']))
-            ->orderBy('nama')
-            ->paginate(15)->withQueryString();
+        $siswa = $this->terapkanSort(
+            $request,
+            Siswa::with(['jurusan', 'kelas', 'tahunAjaran'])
+                ->cari($request->q)
+                ->filter($request->only(['tahun_ajaran_id', 'jurusan_id', 'kelas_id', 'status'])),
+            ['nis', 'nama', 'tahun_ajaran_id', 'status'],
+            'nama'
+        )->paginate(15)->withQueryString();
 
         return view('admin.siswa.index', [
             'siswa' => $siswa,

@@ -14,10 +14,14 @@ class BeritaAdminController extends Controller
 {
     public function index(Request $request)
     {
-        $berita = Berita::with('kategori')
-            ->when($request->filled('q'), fn ($q) => $q->where('judul', 'like', '%'.$request->q.'%'))
-            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
-            ->latest()->paginate(15)->withQueryString();
+        $berita = $this->terapkanSort(
+            $request,
+            Berita::with('kategori')
+                ->when($request->filled('q'), fn ($q) => $q->where('judul', 'like', '%'.$request->q.'%'))
+                ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status)),
+            ['judul', 'status', 'published_at'],
+            'published_at', 'desc'
+        )->paginate(15)->withQueryString();
 
         return view('admin.berita.index', ['berita' => $berita]);
     }

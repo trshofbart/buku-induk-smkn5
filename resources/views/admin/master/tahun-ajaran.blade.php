@@ -11,7 +11,7 @@
 </form>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">
-        <thead><tr class="bg-slate-100 text-left"><th class="px-4 py-3">Tahun Ajaran</th><th class="px-4 py-3">Periode</th><th class="px-4 py-3">Aktif</th><th class="px-4 py-3">Aksi</th></tr></thead>
+        <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Tahun Ajaran', 'key' => 'nama'])@include('admin._sort-th', ['label' => 'Periode', 'key' => 'tanggal_mulai'])@include('admin._sort-th', ['label' => 'Aktif', 'key' => 'is_active'])<th class="px-4 py-3">Aksi</th></tr></thead>
         <tbody>
         @foreach ($tahun as $t)
             <tr class="border-t"><td class="px-4 py-3 font-semibold">{{ $t->nama }}</td><td class="px-4 py-3">{{ $t->tanggal_mulai?->format('d M Y') ?? '-' }} s.d. {{ $t->tanggal_selesai?->format('d M Y') ?? '-' }}</td><td class="px-4 py-3">{{ $t->is_active ? 'Ya' : 'Tidak' }}</td><td class="px-4 py-3 whitespace-nowrap">@if(!$t->is_active)<form method="POST" action="{{ route('admin.tahun-ajaran.aktifkan', $t) }}" class="inline">@csrf<button class="text-green-700 font-semibold">Jadikan Aktif</button></form> | @endif<form method="POST" action="{{ route('admin.tahun-ajaran.destroy', $t) }}" class="inline" onsubmit="return confirm('Hapus tahun ajaran ini?')">@csrf @method('DELETE')<button class="text-red-700">Hapus</button></form></td></tr>

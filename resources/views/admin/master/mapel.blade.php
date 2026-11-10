@@ -25,12 +25,18 @@
 </form>
 <p class="text-sm text-slate-500 mb-4">Daftar awal 20 mapel diambil dari sheet MAPEL file MASTER (TEI &amp; RPL A). Mapel tanpa jurusan berlaku untuk semua jurusan; tanpa tingkat berlaku untuk X, XI, dan XII. Bila sebuah jurusan punya mapel sendiri di suatu kelompok (mis. C3-nya sendiri), mapel itu <strong>menggantikan</strong> mapel umum di kelompok tersebut pada lembar cetak — jadi tambahkan seluruh daftar mapel kelompok itu untuk jurusan tersebut.</p>
 
+<form method="GET" class="bg-white rounded-xl shadow p-4 flex gap-2 mb-4">
+    <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari nama mata pelajaran..." class="border rounded-lg px-3 py-2 flex-1">
+    <button class="bg-green-700 text-white px-4 py-2 rounded-lg">Cari</button>
+    @if (! empty($q))<a href="{{ route('admin.mapel.index') }}" class="border border-slate-300 px-4 py-2 rounded-lg">Reset</a>@endif
+</form>
+
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">
-        <thead><tr class="bg-slate-100 text-left"><th class="px-4 py-3">Kelompok</th><th class="px-4 py-3">Nama</th><th class="px-4 py-3">Jurusan</th><th class="px-4 py-3">Tingkat</th><th class="px-4 py-3">KKM</th><th class="px-4 py-3">Aksi</th></tr></thead>
+        <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Kelompok', 'key' => 'kelompok'])@include('admin._sort-th', ['label' => 'Nama', 'key' => 'nama'])<th class="px-4 py-3">Jurusan</th>@include('admin._sort-th', ['label' => 'Tingkat', 'key' => 'tingkat'])@include('admin._sort-th', ['label' => 'Urutan', 'key' => 'urutan'])@include('admin._sort-th', ['label' => 'KKM', 'key' => 'kkm_default'])<th class="px-4 py-3">Aksi</th></tr></thead>
         <tbody>
         @foreach ($mapel as $m)
-            <tr class="border-t"><td class="px-4 py-3">{{ $m->kelompokLabel() }}</td><td class="px-4 py-3 font-semibold">{{ $m->nama }} @if (! $m->tampil_cetak)<span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs font-normal">Disembunyikan dari cetak</span>@endif</td><td class="px-4 py-3">{{ $m->jurusan?->nama ?? 'Semua' }}</td><td class="px-4 py-3">{{ $m->tingkat ?? 'Semua' }}</td><td class="px-4 py-3">{{ $m->kkm_default }}</td><td class="px-4 py-3"><div class="flex gap-3"><a href="{{ route('admin.mapel.edit', ['mapel' => $m->id, 'kembali' => request()->getRequestUri()]) }}" class="text-green-700">Edit</a><form method="POST" action="{{ route('admin.mapel.destroy', $m) }}" onsubmit="return confirm('Hapus mapel ini?')">@csrf @method('DELETE')<button class="text-red-700">Hapus</button></form></div></td></tr>
+            <tr class="border-t"><td class="px-4 py-3">{{ $m->kelompokLabel() }}</td><td class="px-4 py-3 font-semibold">{{ $m->nama }} @if (! $m->tampil_cetak)<span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-xs font-normal">Disembunyikan dari cetak</span>@endif</td><td class="px-4 py-3">{{ $m->jurusan?->nama ?? 'Semua' }}</td><td class="px-4 py-3">{{ $m->tingkat ?? 'Semua' }}</td><td class="px-4 py-3">{{ $m->urutan }}</td><td class="px-4 py-3">{{ $m->kkm_default }}</td><td class="px-4 py-3"><div class="flex gap-3"><a href="{{ route('admin.mapel.edit', ['mapel' => $m->id, 'kembali' => request()->getRequestUri()]) }}" class="text-green-700">Edit</a><form method="POST" action="{{ route('admin.mapel.destroy', $m) }}" onsubmit="return confirm('Hapus mapel ini?')">@csrf @method('DELETE')<button class="text-red-700">Hapus</button></form></div></td></tr>
         @endforeach
         </tbody>
     </table>

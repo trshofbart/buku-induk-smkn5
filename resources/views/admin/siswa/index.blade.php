@@ -29,7 +29,7 @@
 
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm min-w-[720px]">
-        <thead><tr class="bg-slate-100 text-left"><th class="px-4 py-3">NIS / NISN</th><th class="px-4 py-3">Nama</th><th class="px-4 py-3">Jurusan / Kelas</th><th class="px-4 py-3">Tahun</th><th class="px-4 py-3">Status</th><th class="px-4 py-3">Aksi</th></tr></thead>
+        <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'NIS / NISN', 'key' => 'nis'])@include('admin._sort-th', ['label' => 'Nama', 'key' => 'nama'])<th class="px-4 py-3">Jurusan / Kelas</th>@include('admin._sort-th', ['label' => 'Tahun', 'key' => 'tahun_ajaran_id'])@include('admin._sort-th', ['label' => 'Status', 'key' => 'status'])<th class="px-4 py-3">Aksi</th></tr></thead>
         <tbody>
         @forelse ($siswa as $s)
             <tr class="border-t">

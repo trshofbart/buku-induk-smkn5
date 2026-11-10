@@ -9,7 +9,9 @@
     <select name="jurusan_id" class="border rounded-lg px-3 py-2">
         @foreach ($daftarJurusan as $j)<option value="{{ $j->id }}" @selected($jurusan->id == $j->id)>{{ $j->nama }} ({{ $j->kode }})</option>@endforeach
     </select>
+    <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="Cari nama mapel..." class="border rounded-lg px-3 py-2 flex-1 min-w-[200px]">
     <button class="bg-green-700 text-white px-4 py-2 rounded-lg">Tampilkan</button>
+    @if (! empty($q))<a href="{{ route('admin.mapel.perjurusan', ['jurusan_id' => $jurusan->id]) }}" class="border border-slate-300 px-4 py-2 rounded-lg">Reset</a>@endif
     <a href="{{ route('admin.mapel.index') }}" class="border border-green-700 text-green-700 px-4 py-2 rounded-lg">Semua Mata Pelajaran</a>
 </form>
 
