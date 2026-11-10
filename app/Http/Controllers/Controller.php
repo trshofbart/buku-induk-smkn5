@@ -24,4 +24,15 @@ abstract class Controller
         }
         return $query->orderBy($sort, $arah);
     }
+
+    /**
+     * Jumlah data per halaman dari query string (?per_page=15|25|50|100).
+     * Di luar pilihan itu kembali ke default (mencegah per_page besar
+     * yang membebani server, mis. menampilkan 6.548 siswa sekaligus).
+     */
+    protected function perPage(Request $request, int $default = 15, array $boleh = [15, 25, 50, 100]): int
+    {
+        $p = (int) $request->input('per_page', $default);
+        return in_array($p, $boleh, true) ? $p : $default;
+    }
 }

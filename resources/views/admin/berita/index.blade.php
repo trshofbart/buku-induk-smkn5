@@ -3,6 +3,9 @@
 
 @section('content')
 <a href="{{ route('admin.berita.create') }}" class="bg-green-700 text-white text-sm px-3 py-2 rounded-lg inline-block mb-4">+ Tulis Berita</a>
+<div class="flex justify-end mb-2">
+    @include('admin._per-page')
+</div>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm min-w-[640px]">
         <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Judul', 'key' => 'judul'])<th class="px-4 py-3">Kategori</th>@include('admin._sort-th', ['label' => 'Status', 'key' => 'status'])@include('admin._sort-th', ['label' => 'Terbit', 'key' => 'published_at'])<th class="px-4 py-3">Aksi</th></tr></thead>

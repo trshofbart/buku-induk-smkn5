@@ -24,7 +24,7 @@ class MasterController extends Controller
             TahunAjaran::query(),
             ['nama', 'tanggal_mulai', 'is_active'],
             'nama', 'desc'
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
         return view('admin.master.tahun-ajaran', ['tahun' => $tahun]);
     }
 
@@ -62,7 +62,7 @@ class MasterController extends Controller
             Jurusan::withCount('siswa'),
             ['kode', 'nama', 'program_studi', 'siswa_count'],
             'nama'
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
         return view('admin.master.jurusan', ['jurusan' => $jurusan]);
     }
 
@@ -95,7 +95,7 @@ class MasterController extends Controller
             Kelas::with(['jurusan', 'tahunAjaran']),
             ['nama', 'tahun_ajaran_id', 'wali_kelas'],
             'tahun_ajaran_id', 'desc'
-        )->orderBy('nama')->paginate(15)->withQueryString();
+        )->orderBy('nama')->paginate($this->perPage($request))->withQueryString();
         return view('admin.master.kelas', [
             'kelas' => $kelas,
             'tahunAjaran' => TahunAjaran::orderByDesc('nama')->get(),
@@ -139,7 +139,7 @@ class MasterController extends Controller
         }
 
         return view('admin.master.mapel', [
-            'mapel' => $query->paginate(25)->withQueryString(),
+            'mapel' => $query->paginate($this->perPage($request, 25))->withQueryString(),
             'jurusan' => Jurusan::orderBy('nama')->get(),
             'q' => $request->q,
         ]);
@@ -303,7 +303,7 @@ class MasterController extends Controller
             })),
             ['name', 'email', 'role', 'is_active'],
             'name'
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
         return view('admin.master.pengguna', ['pengguna' => $pengguna, 'q' => $request->q]);
     }
 
@@ -358,7 +358,7 @@ class MasterController extends Controller
             ActivityLog::with('user'),
             ['created_at', 'aksi'],
             'created_at', 'desc'
-        )->paginate(25)->withQueryString();
+        )->paginate($this->perPage($request, 25))->withQueryString();
         return view('admin.master.log', [
             'log' => $log,
         ]);

@@ -15,7 +15,7 @@ class PengumumanAdminController extends Controller
             Pengumuman::when($request->filled('q'), fn ($q) => $q->where('judul', 'like', '%'.$request->q.'%')),
             ['judul', 'tanggal_mulai', 'is_active'],
             'tanggal_mulai', 'desc'
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
         return view('admin.pengumuman.index', ['pengumuman' => $pengumuman, 'q' => $request->q]);
     }
 

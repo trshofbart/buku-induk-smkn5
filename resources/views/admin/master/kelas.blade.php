@@ -11,6 +11,9 @@
     <input name="wali_kelas" placeholder="Wali kelas" class="border rounded-lg px-3 py-2">
     <button class="bg-green-700 text-white px-4 py-2 rounded-lg">+ Tambah</button>
 </form>
+<div class="flex justify-end mb-2">
+    @include('admin._per-page')
+</div>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">
         <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Kelas', 'key' => 'nama'])<th class="px-4 py-3">Jurusan</th>@include('admin._sort-th', ['label' => 'Tahun', 'key' => 'tahun_ajaran_id'])@include('admin._sort-th', ['label' => 'Wali Kelas', 'key' => 'wali_kelas'])<th class="px-4 py-3">Aksi</th></tr></thead>

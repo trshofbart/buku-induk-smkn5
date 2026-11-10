@@ -9,6 +9,9 @@
     <input name="program_studi" placeholder="Program Studi Keahlian (opsional)" class="border rounded-lg px-3 py-2 flex-1">
     <button class="bg-green-700 text-white px-4 py-2 rounded-lg">+ Tambah</button>
 </form>
+<div class="flex justify-end mb-2">
+    @include('admin._per-page')
+</div>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">
         <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Kode', 'key' => 'kode'])@include('admin._sort-th', ['label' => 'Nama', 'key' => 'nama'])@include('admin._sort-th', ['label' => 'Program Studi Keahlian', 'key' => 'program_studi'])@include('admin._sort-th', ['label' => 'Jumlah Siswa', 'key' => 'siswa_count'])<th class="px-4 py-3">Aksi</th></tr></thead>

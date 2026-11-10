@@ -18,6 +18,9 @@
     <button class="bg-green-700 text-white px-4 py-2 rounded-lg">Cari</button>
     @if (! empty($q))<a href="{{ route('admin.pengguna.index') }}" class="border border-slate-300 px-4 py-2 rounded-lg">Reset</a>@endif
 </form>
+<div class="flex justify-end mb-2">
+    @include('admin._per-page')
+</div>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">
         <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Nama', 'key' => 'name'])@include('admin._sort-th', ['label' => 'Email', 'key' => 'email'])@include('admin._sort-th', ['label' => 'Role', 'key' => 'role'])@include('admin._sort-th', ['label' => 'Status', 'key' => 'is_active'])<th class="px-4 py-3">Aksi</th></tr></thead>

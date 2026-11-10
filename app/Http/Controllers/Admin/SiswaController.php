@@ -26,7 +26,7 @@ class SiswaController extends Controller
                 ->filter($request->only(['tahun_ajaran_id', 'jurusan_id', 'kelas_id', 'status'])),
             ['nis', 'nama', 'tahun_ajaran_id', 'status'],
             'nama'
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return view('admin.siswa.index', [
             'siswa' => $siswa,

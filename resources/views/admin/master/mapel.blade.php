@@ -31,6 +31,9 @@
     @if (! empty($q))<a href="{{ route('admin.mapel.index') }}" class="border border-slate-300 px-4 py-2 rounded-lg">Reset</a>@endif
 </form>
 
+<div class="flex justify-end mb-2">
+    @include('admin._per-page', ['default' => 25])
+</div>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">
         <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Kelompok', 'key' => 'kelompok'])@include('admin._sort-th', ['label' => 'Nama', 'key' => 'nama'])<th class="px-4 py-3">Jurusan</th>@include('admin._sort-th', ['label' => 'Tingkat', 'key' => 'tingkat'])@include('admin._sort-th', ['label' => 'Urutan', 'key' => 'urutan'])@include('admin._sort-th', ['label' => 'KKM', 'key' => 'kkm_default'])<th class="px-4 py-3">Aksi</th></tr></thead>

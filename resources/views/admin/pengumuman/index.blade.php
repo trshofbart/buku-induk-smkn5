@@ -8,6 +8,9 @@
     <button class="bg-green-700 text-white px-4 py-2 rounded-lg">Cari</button>
     @if (! empty($q))<a href="{{ route('admin.pengumuman.index') }}" class="border border-slate-300 px-4 py-2 rounded-lg">Reset</a>@endif
 </form>
+<div class="flex justify-end mb-2">
+    @include('admin._per-page')
+</div>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">
         <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Judul', 'key' => 'judul'])@include('admin._sort-th', ['label' => 'Periode', 'key' => 'tanggal_mulai'])@include('admin._sort-th', ['label' => 'Aktif', 'key' => 'is_active'])<th class="px-4 py-3">Aksi</th></tr></thead>

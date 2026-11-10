@@ -128,4 +128,28 @@ class SortFilterTest extends TestCase
         $this->actingAs($admin)->get(route('admin.log.index', ['sort' => 'aksi', 'dir' => 'desc']))
             ->assertOk();
     }
+
+    public function test_pilihan_jumlah_data_per_halaman(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+
+        // Siswa: per_page=50 dipakai, pilihan muncul di halaman.
+        $this->actingAs($admin)->get(route('admin.siswa.index', ['per_page' => 50]))
+            ->assertOk()
+            ->assertSee('Tampilkan')
+            ->assertViewHas('siswa', fn ($p) => $p->perPage() === 50);
+
+        // per_page di luar pilihan kembali ke default (15).
+        $this->actingAs($admin)->get(route('admin.siswa.index', ['per_page' => 999]))
+            ->assertOk()
+            ->assertViewHas('siswa', fn ($p) => $p->perPage() === 15);
+
+        // Mapel: default 25, per_page=100 dipakai.
+        $this->actingAs($admin)->get(route('admin.mapel.index'))
+            ->assertOk()
+            ->assertViewHas('mapel', fn ($p) => $p->perPage() === 25);
+        $this->actingAs($admin)->get(route('admin.mapel.index', ['per_page' => 100]))
+            ->assertOk()
+            ->assertViewHas('mapel', fn ($p) => $p->perPage() === 100);
+    }
 }

@@ -27,6 +27,9 @@
     <button class="bg-green-700 text-white px-3 py-2 rounded-lg">Filter</button>
 </form>
 
+<div class="flex justify-end mb-2">
+    @include('admin._per-page')
+</div>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm min-w-[720px]">
         <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'NIS / NISN', 'key' => 'nis'])@include('admin._sort-th', ['label' => 'Nama', 'key' => 'nama'])<th class="px-4 py-3">Jurusan / Kelas</th>@include('admin._sort-th', ['label' => 'Tahun', 'key' => 'tahun_ajaran_id'])@include('admin._sort-th', ['label' => 'Status', 'key' => 'status'])<th class="px-4 py-3">Aksi</th></tr></thead>

@@ -21,7 +21,7 @@ class BeritaAdminController extends Controller
                 ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status)),
             ['judul', 'status', 'published_at'],
             'published_at', 'desc'
-        )->paginate(15)->withQueryString();
+        )->paginate($this->perPage($request))->withQueryString();
 
         return view('admin.berita.index', ['berita' => $berita]);
     }

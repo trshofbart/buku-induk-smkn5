@@ -2,6 +2,9 @@
 @section('title', 'Log Aktivitas')
 
 @section('content')
+<div class="flex justify-end mb-2">
+    @include('admin._per-page', ['default' => 25])
+</div>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">
         <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Waktu', 'key' => 'created_at'])<th class="px-4 py-3">Pegawai</th>@include('admin._sort-th', ['label' => 'Aksi', 'key' => 'aksi'])<th class="px-4 py-3">Keterangan</th></tr></thead>

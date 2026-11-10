@@ -9,6 +9,9 @@
     <input type="date" name="tanggal_selesai" class="border rounded-lg px-3 py-2">
     <button class="bg-green-700 text-white px-4 py-2 rounded-lg">+ Tambah</button>
 </form>
+<div class="flex justify-end mb-2">
+    @include('admin._per-page')
+</div>
 <div class="bg-white rounded-xl shadow overflow-x-auto">
     <table class="w-full text-sm">
         <thead><tr class="bg-slate-100 text-left">@include('admin._sort-th', ['label' => 'Tahun Ajaran', 'key' => 'nama'])@include('admin._sort-th', ['label' => 'Periode', 'key' => 'tanggal_mulai'])@include('admin._sort-th', ['label' => 'Aktif', 'key' => 'is_active'])<th class="px-4 py-3">Aksi</th></tr></thead>
