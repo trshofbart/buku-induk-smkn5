@@ -99,6 +99,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
         Route::get('/mapel', [MasterController::class, 'mapelIndex'])->name('mapel.index');
         Route::post('/mapel', [MasterController::class, 'mapelStore'])->name('mapel.store');
+        Route::get('/mapel/{mapel}/edit', [MasterController::class, 'mapelEdit'])->name('mapel.edit');
+        Route::put('/mapel/{mapel}', [MasterController::class, 'mapelUpdate'])->name('mapel.update');
         Route::delete('/mapel/{mapel}', [MasterController::class, 'mapelDestroy'])->name('mapel.destroy');
         Route::get('/mapel-per-jurusan', [MasterController::class, 'mapelPerJurusan'])->name('mapel.perjurusan');
         Route::post('/mapel-per-jurusan/salin', [MasterController::class, 'mapelSalinUmum'])->name('mapel.salin');

@@ -133,6 +133,49 @@ class MasterController extends Controller
         return back()->with('status', 'Mata pelajaran berhasil ditambahkan.');
     }
 
+    public function mapelEdit(Mapel $mapel)
+    {
+        return view('admin.master.mapel-edit', [
+            'mapel' => $mapel,
+            'jurusan' => Jurusan::orderBy('nama')->get(),
+            'kembali' => $this->kembaliAman(request('kembali')),
+        ]);
+    }
+
+    public function mapelUpdate(Request $request, Mapel $mapel)
+    {
+        $data = $request->validate([
+            'nama' => 'required|string|max:150',
+            'kelompok' => 'required|in:A,B,C1,C2,C3',
+            'jurusan_id' => 'nullable|exists:jurusan,id',
+            'tingkat' => 'nullable|in:X,XI,XII',
+            'urutan' => 'nullable|integer|min:0',
+            'kkm_default' => 'nullable|numeric|min:0|max:100',
+        ]);
+        // Kombinasi (nama, jurusan, tingkat) harus unik — kecuali mapel ini sendiri.
+        $duplikat = Mapel::where('nama', $data['nama'])
+            ->where('jurusan_id', $data['jurusan_id'] ?? null)
+            ->where('tingkat', $data['tingkat'] ?? null)
+            ->where('id', '!=', $mapel->id)
+            ->exists();
+        if ($duplikat) {
+            return back()->withErrors(['nama' => 'Mata pelajaran dengan nama, jurusan, dan tingkat yang sama sudah ada.'])->withInput();
+        }
+        $mapel->update($data);
+        $kembali = $this->kembaliAman($request->input('kembali'));
+        return redirect()->to($kembali ?? route('admin.mapel.index'))
+            ->with('status', 'Mata pelajaran berhasil diubah.');
+    }
+
+    /** Hanya terima URL kembali berupa path lokal (mencegah open redirect). */
+    protected function kembaliAman(?string $url): ?string
+    {
+        if (! $url || ! str_starts_with($url, '/') || str_starts_with($url, '//')) {
+            return null;
+        }
+        return $url;
+    }
+
     public function mapelDestroy(Mapel $mapel)
     {
         if ($mapel->nilai()->exists()) {

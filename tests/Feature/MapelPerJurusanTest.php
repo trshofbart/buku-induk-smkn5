@@ -173,4 +173,72 @@ class MapelPerJurusanTest extends TestCase
         $guru = User::where('email', 'guru@smkn5.sch.id')->firstOrFail();
         $this->actingAs($guru)->get(route('admin.mapel.perjurusan'))->assertForbidden();
     }
+
+    public function test_admin_bisa_mengubah_urutan_mapel_lewat_edit(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $mapel = Mapel::where('nama', 'Fisika')->firstOrFail();
+
+        // Halaman edit tampil dengan nilai lama terisi.
+        $this->actingAs($admin)->get(route('admin.mapel.edit', $mapel))
+            ->assertOk()
+            ->assertSee('Ubah Mata Pelajaran')
+            ->assertSee('Fisika');
+
+        // Ubah urutan (ini yang menentukan posisi di lembar cetak).
+        $this->actingAs($admin)->put(route('admin.mapel.update', $mapel), [
+            'nama' => 'Fisika',
+            'kelompok' => 'C1',
+            'jurusan_id' => null,
+            'tingkat' => null,
+            'urutan' => 99,
+            'kkm_default' => 76,
+        ])->assertRedirect(route('admin.mapel.index'));
+
+        $this->assertDatabaseHas('mapel', ['id' => $mapel->id, 'nama' => 'Fisika', 'urutan' => 99]);
+    }
+
+    public function test_edit_mapel_menolak_duplikat_nama_jurusan_tingkat(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $fisika = Mapel::where('nama', 'Fisika')->firstOrFail();
+        $kimia = Mapel::where('nama', 'Kimia')->firstOrFail();
+
+        $this->actingAs($admin)->put(route('admin.mapel.update', $kimia), [
+            'nama' => 'Fisika',
+            'kelompok' => 'C1',
+            'jurusan_id' => null,
+            'tingkat' => null,
+            'urutan' => 11,
+            'kkm_default' => 76,
+        ])->assertSessionHasErrors('nama');
+
+        $this->assertDatabaseHas('mapel', ['id' => $kimia->id, 'nama' => 'Kimia']);
+    }
+
+    public function test_tombol_edit_ada_di_menu_mapel_umum_dan_per_jurusan(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $jurusan = Jurusan::where('kode', 'TKJ')->firstOrFail();
+        $mapel = Mapel::where('nama', 'Fisika')->firstOrFail();
+
+        $this->actingAs($admin)->get(route('admin.mapel.index'))
+            ->assertOk()
+            ->assertSee(route('admin.mapel.edit', $mapel), false);
+
+        $this->actingAs($admin)->get(route('admin.mapel.perjurusan', ['jurusan_id' => $jurusan->id]))
+            ->assertOk()
+            ->assertSee(route('admin.mapel.edit', $mapel), false);
+    }
+
+    public function test_guru_tidak_bisa_edit_mapel(): void
+    {
+        $guru = User::where('email', 'guru@smkn5.sch.id')->firstOrFail();
+        $mapel = Mapel::where('nama', 'Fisika')->firstOrFail();
+
+        $this->actingAs($guru)->get(route('admin.mapel.edit', $mapel))->assertForbidden();
+        $this->actingAs($guru)->put(route('admin.mapel.update', $mapel), [
+            'nama' => 'Fisika', 'kelompok' => 'C1', 'urutan' => 99,
+        ])->assertForbidden();
+    }
 }
