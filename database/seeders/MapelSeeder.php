@@ -19,7 +19,7 @@ class MapelSeeder extends Seeder
      * Rangkaian, Sistem Pengendali, Mikroprosesor, Pengendali Robotik,
      * Pembuatan Peralatan) adalah khusus TEI, bukan umum; 'Dasar
      * Listrik' tetap umum (TEI, TITL, TOI) dan 'Produk Kreatif' tetap
-     * umum (semua jurusan). Tiga mapel agama non-Islam adalah umum
+     * umum (semua jurusan). Empat mapel agama non-Islam adalah umum
      * kelompok A (siswa mengambil salah satu sesuai agamanya).
      */
     public function run(): void
@@ -31,6 +31,7 @@ class MapelSeeder extends Seeder
             ['Pendidikan Agama Islam dan Budi Pekerti', 'A', 1, null, null],
             ['Pendidikan Agama Kristen dan Budi Pekerti', 'A', 1, null, null],
             ['Pendidikan Agama Katholik dan Budi Pekerti', 'A', 1, null, null],
+            ['Pendidikan Agama Hindu dan Budi Pekerti', 'A', 1, null, null],
             ['Pendidikan Agama Buddha dan Budi Pekerti', 'A', 1, null, null],
             ['Pendidikan Pancasila dan Kewarganegaraan', 'A', 2, null, null],
             ['Bahasa Indonesia', 'A', 3, null, null],

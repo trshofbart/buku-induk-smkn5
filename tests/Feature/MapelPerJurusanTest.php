@@ -48,6 +48,20 @@ class MapelPerJurusanTest extends TestCase
         $this->assertTrue(Mapel::where('jurusan_id', $jurusan->id)->where('kelompok', 'C1')->exists());
     }
 
+    public function test_mapel_agama_hindu_ada_dan_tampil_di_cetak(): void
+    {
+        $siswa = Siswa::whereNotNull('kelas_id')->firstOrFail();
+
+        $hindu = Mapel::where('nama', 'Pendidikan Agama Hindu dan Budi Pekerti')->first();
+        $this->assertNotNull($hindu);
+        $this->assertNull($hindu->jurusan_id);
+        $this->assertSame('A', $hindu->kelompok);
+
+        $laporan = $siswa->laporanNilai();
+        $namaA = collect($laporan['X']['kelompok']['A'] ?? [])->map(fn ($r) => $r['mapel']->nama);
+        $this->assertContains('Pendidikan Agama Hindu dan Budi Pekerti', $namaA);
+    }
+
     public function test_salin_daftar_umum_lalu_cetak_memakai_daftar_khusus_jurusan(): void
     {
         $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
