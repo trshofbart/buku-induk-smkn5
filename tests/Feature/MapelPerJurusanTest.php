@@ -31,6 +31,23 @@ class MapelPerJurusanTest extends TestCase
             ->assertSee('Umum');
     }
 
+    public function test_halaman_mapel_per_jurusan_menampilkan_kelompok_c1(): void
+    {
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $jurusan = Jurusan::where('kode', 'TKJ')->firstOrFail();
+
+        $this->actingAs($admin)->get(route('admin.mapel.perjurusan', ['jurusan_id' => $jurusan->id]))
+            ->assertOk()
+            ->assertSee('C1 — Dasar Bidang Keahlian')
+            ->assertSee('Simulasi dan Komunikasi Digital')
+            ->assertSee('Fisika');
+
+        // Salin juga menyalin mapel C1 umum menjadi khusus jurusan.
+        $this->actingAs($admin)->post(route('admin.mapel.salin'), ['jurusan_id' => $jurusan->id])
+            ->assertRedirect();
+        $this->assertTrue(Mapel::where('jurusan_id', $jurusan->id)->where('kelompok', 'C1')->exists());
+    }
+
     public function test_salin_daftar_umum_lalu_cetak_memakai_daftar_khusus_jurusan(): void
     {
         $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();

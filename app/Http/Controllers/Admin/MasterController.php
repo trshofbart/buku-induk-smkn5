@@ -154,11 +154,11 @@ class MasterController extends Controller
         $daftar = [];
         foreach (['X', 'XI', 'XII'] as $tingkat) {
             $daftar[$tingkat] = Mapel::untukJurusanTingkat($jurusan->id, $tingkat)
-                ->whereIn('kelompok', ['C2', 'C3'])
+                ->whereIn('kelompok', ['C1', 'C2', 'C3'])
                 ->groupBy('kelompok');
         }
         $punyaKhusus = Mapel::where('jurusan_id', $jurusan->id)
-            ->whereIn('kelompok', ['C2', 'C3'])->exists();
+            ->whereIn('kelompok', ['C1', 'C2', 'C3'])->exists();
 
         return view('admin.master.mapel-per-jurusan', [
             'jurusan' => $jurusan,
@@ -168,12 +168,12 @@ class MasterController extends Controller
         ]);
     }
 
-    /** Salin daftar C2/C3 umum menjadi daftar khusus jurusan ini (untuk diedit). */
+    /** Salin daftar C1/C2/C3 umum menjadi daftar khusus jurusan ini (untuk diedit). */
     public function mapelSalinUmum(Request $request)
     {
         $data = $request->validate(['jurusan_id' => 'required|exists:jurusan,id']);
         $disalin = 0;
-        foreach (Mapel::whereNull('jurusan_id')->whereIn('kelompok', ['C2', 'C3'])->get() as $m) {
+        foreach (Mapel::whereNull('jurusan_id')->whereIn('kelompok', ['C1', 'C2', 'C3'])->get() as $m) {
             $baru = Mapel::firstOrCreate(
                 ['nama' => $m->nama, 'jurusan_id' => $data['jurusan_id'], 'tingkat' => $m->tingkat],
                 ['kelompok' => $m->kelompok, 'urutan' => $m->urutan, 'kkm_default' => $m->kkm_default,
@@ -184,7 +184,7 @@ class MasterController extends Controller
             }
         }
 
-        return back()->with('status', "$disalin mapel C2/C3 umum disalin ke jurusan ini. Silakan ubah nama atau hapus sesuai daftar jurusan.");
+        return back()->with('status', "$disalin mapel C1/C2/C3 umum disalin ke jurusan ini. Silakan ubah nama atau hapus sesuai daftar jurusan.");
     }
 
     // ---------- Data Sekolah ----------
