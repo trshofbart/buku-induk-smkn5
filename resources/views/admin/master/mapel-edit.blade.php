@@ -60,7 +60,7 @@
 
         <div class="flex gap-2 pt-2">
             <button class="bg-green-700 text-white px-4 py-2 rounded-lg">Simpan Perubahan</button>
-            <a href="{{ $kembali ?? route('admin.mapel.index') }}" class="border border-slate-300 px-4 py-2 rounded-lg">Batal</a>
+            <a href="{{ $kembali ? url($kembali) : route('admin.mapel.index') }}" class="border border-slate-300 px-4 py-2 rounded-lg">Batal</a>
         </div>
 
         <label class="flex items-start gap-2 pt-2 border-t">

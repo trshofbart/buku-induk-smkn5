@@ -191,4 +191,26 @@ class SortFilterTest extends TestCase
             'kembali' => '/admin/mapel-per-jurusan?jurusan_id=1',
         ])->assertRedirect('/admin/mapel-per-jurusan?jurusan_id=1');
     }
+
+    public function test_tombol_batal_edit_mapel_menuju_url_lengkap(): void
+    {
+        // Regresi lanjutan: kembali kini disimpan sebagai path relatif
+        // app root (/admin/...). Bila dipakai mentah sebagai <a href>,
+        // browser menyelesaikannya terhadap domain root sehingga prefix
+        // subdirektori (/buku-induk-smkn5/public) hilang dan 404.
+        // Tombol Batal harus memakai url() agar jadi URL lengkap.
+        $admin = User::where('email', 'admin@smkn5.sch.id')->firstOrFail();
+        $mapel = Mapel::where('nama', 'Fisika')->firstOrFail();
+
+        $response = $this->actingAs($admin)->get(route('admin.mapel.edit', [
+            'mapel' => $mapel->id,
+            'kembali' => '/admin/mapel-per-jurusan?jurusan_id=1',
+        ]))->assertOk();
+
+        $this->assertStringContainsString(
+            'href="'.url('/admin/mapel-per-jurusan?jurusan_id=1').'"',
+            $response->getContent(),
+            'Tombol Batal harus memakai URL lengkap, bukan path mentah'
+        );
+    }
 }
