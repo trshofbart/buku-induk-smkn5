@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Jurusan;
 use App\Models\Mapel;
+use App\Models\Nilai;
 use App\Models\Siswa;
+use App\Models\TahunAjaran;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -60,6 +62,41 @@ class MapelPerJurusanTest extends TestCase
         $laporan = $siswa->laporanNilai();
         $namaA = collect($laporan['X']['kelompok']['A'] ?? [])->map(fn ($r) => $r['mapel']->nama);
         $this->assertContains('Pendidikan Agama Hindu dan Budi Pekerti', $namaA);
+    }
+
+    public function test_pindah_nilai_agama_siswa_hindu_dari_islam_ke_hindu(): void
+    {
+        $jurusan = Jurusan::where('kode', 'TKJ')->firstOrFail();
+        $tahunAjaran = TahunAjaran::where('nama', '2025-2026')->firstOrFail();
+        $islam = Mapel::where('nama', 'Pendidikan Agama Islam dan Budi Pekerti')->firstOrFail();
+        $hindu = Mapel::where('nama', 'Pendidikan Agama Hindu dan Budi Pekerti')->firstOrFail();
+
+        $siswa = Siswa::create([
+            'nis' => '999901', 'nama' => 'Siswa Hindu Contoh', 'agama' => 'Hindu',
+            'jenis_kelamin' => 'L',
+            'jurusan_id' => $jurusan->id, 'tahun_ajaran_id' => $tahunAjaran->id,
+            'status' => 'aktif',
+        ]);
+
+        // Nilai agama siswa Hindu yang (salah) tercatat di mapel Islam.
+        foreach ([1, 2] as $smt) {
+            Nilai::create([
+                'siswa_id' => $siswa->id, 'mapel_id' => $islam->id,
+                'tahun_ajaran_id' => $tahunAjaran->id, 'semester' => $smt,
+                'kkm' => 76, 'nilai_angka' => 80,
+            ]);
+        }
+
+        $migration = require database_path('migrations/2026_11_10_000028_pindah_nilai_agama_hindu.php');
+        $migration->up();
+
+        $this->assertDatabaseMissing('nilai', ['siswa_id' => $siswa->id, 'mapel_id' => $islam->id]);
+        $this->assertDatabaseHas('nilai', ['siswa_id' => $siswa->id, 'mapel_id' => $hindu->id, 'semester' => 1, 'nilai_angka' => 80]);
+        $this->assertDatabaseHas('nilai', ['siswa_id' => $siswa->id, 'mapel_id' => $hindu->id, 'semester' => 2, 'nilai_angka' => 80]);
+
+        // Idempotent: jalankan lagi, tidak ada yang berubah.
+        $migration->up();
+        $this->assertEquals(2, Nilai::where('siswa_id', $siswa->id)->count());
     }
 
     public function test_salin_daftar_umum_lalu_cetak_memakai_daftar_khusus_jurusan(): void
